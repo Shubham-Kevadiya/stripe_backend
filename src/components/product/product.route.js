@@ -11,7 +11,7 @@ productRoute.post(
   productController.createProduct
 );
 productRoute.post(
-  "/update",
+  "/update/:productId",
   productValidate.validateBodySchema(productValidateSchema.updateProductSchema),
   productController.updateProduct
 );
@@ -22,16 +22,12 @@ productRoute.get(
 );
 productRoute.get(
   "/:productId",
-  productValidate.validateParamSchema(
-    productValidateSchema.getProductByIdSchema
-  ),
+
   productController.getProductById
 );
 productRoute.delete(
   "/:productId",
-  productValidate.validateParamSchema(
-    productValidateSchema.deleteProductByIdSchema
-  ),
+
   productController.deleteProduct
 );
 

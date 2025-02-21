@@ -63,4 +63,11 @@ export default {
       message: "Invalid Password",
     },
   },
+  NOT_FOUND: {
+    httpStatusCode: 404,
+    body: {
+      code: "not_found",
+      message: "Not Found",
+    },
+  },
 };
