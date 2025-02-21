@@ -7,20 +7,24 @@ const saveProduct = async (productData) => {
 
 const getAllProduct = async (page, limit) => {
   const products = await ProductModel.find()
-    .skip(page ? page : 1 * limit ? limit : 10)
+    .skip(page ? page - 1 : 1 * limit ? limit : 10)
     .limit(limit ? limit : 10);
   return products;
 };
 
 const getProductById = async (productId) => {
-  const product = await ProductModel.findById(productId).lean();
+  const product = await ProductModel.findById(productId);
   return product;
 };
 
 const updateProductById = async (productData) => {
-  const product = await ProductModel.findByIdAndUpdate(productData._id, {
-    ...productData,
-  });
+  const product = await ProductModel.findByIdAndUpdate(
+    productData.productId,
+    {
+      ...productData,
+    },
+    { new: true }
+  );
   return product;
 };
 

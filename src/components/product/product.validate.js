@@ -17,18 +17,8 @@ const getProductSchema = Joi.object({
   limit: Joi.number().required(),
 });
 
-const getProductByIdSchema = Joi.object({
-  productId: Joi.string().required(),
-});
-
-const deleteProductByIdSchema = Joi.object({
-  productId: Joi.string().required(),
-});
-
 export default {
   createProductSchema,
   updateProductSchema,
   getProductSchema,
-  getProductByIdSchema,
-  deleteProductByIdSchema,
 };
