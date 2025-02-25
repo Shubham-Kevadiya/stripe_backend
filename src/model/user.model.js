@@ -32,13 +32,31 @@ const userSchema = new mongoose.Schema(
           type: String,
           require: true,
         },
-        method: {
+        type: {
           type: String,
           require: true,
         },
       },
     ],
+    defaultPaymentMethod: {
+      id: {
+        type: String,
+        default: "",
+      },
+      type: {
+        type: String,
+        default: "",
+      },
+    },
     address: {
+      name: {
+        type: String,
+        default: "",
+      },
+      email: {
+        type: String,
+        default: "",
+      },
       city: {
         type: String,
         default: "",
@@ -64,26 +82,12 @@ const userSchema = new mongoose.Schema(
         default: "",
       },
     },
-    shipping: {
-      address: {
-        type: String,
-        default: "",
-      },
-      name: {
-        type: String,
-        default: "",
-      },
-      phone: {
-        type: String,
-        default: "",
-      },
-    },
     userType: {
       type: String,
       default: "USER",
     },
   },
-  { timestamps: true }
+  { timestamps: true, versionKey: false }
 );
 
 export const UserModel = new mongoose.model("user", userSchema);

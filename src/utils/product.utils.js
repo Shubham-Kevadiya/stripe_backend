@@ -18,17 +18,27 @@ const getProductById = async (productId) => {
 };
 
 const updateProductById = async (productData) => {
-  const product = await ProductModel.findByIdAndUpdate(
+  const product = await getProductById(productData.productId);
+  if (!product) {
+    console.log("product not found");
+    throw new Error("NOT_FOUND");
+  }
+  const updatedProduct = await ProductModel.findByIdAndUpdate(
     productData.productId,
     {
       ...productData,
     },
     { new: true }
   );
-  return product;
+  return updatedProduct;
 };
 
 const deleteProductById = async (productId) => {
+  const product = await getProductById(productId);
+  if (!product) {
+    console.log("product not found");
+    throw new Error("NOT_FOUND");
+  }
   await ProductModel.findByIdAndDelete(productId);
   return "product deleted successsfully !";
 };

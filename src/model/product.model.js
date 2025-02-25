@@ -10,11 +10,11 @@ const productSchema = new mongoose.Schema(
       type: Number,
       require: true,
     },
-    price_id: {
+    priceId: {
       type: String,
       require: true,
     },
-    product_id: {
+    stripeProductId: {
       type: String,
       require: true,
     },
@@ -23,7 +23,7 @@ const productSchema = new mongoose.Schema(
       require: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true, versionKey: false }
 );
 
 export const ProductModel = new mongoose.model("product", productSchema);

@@ -52,7 +52,7 @@ export default {
   USER_ALREADY_EXIST: {
     httpStatusCode: 401,
     body: {
-      code: "user_nalready_exist",
+      code: "user_already_exist",
       message: "User Already Exist",
     },
   },
