@@ -50,28 +50,16 @@ const createPaymentMethodInStripe = async (paymentMethodData) => {
     type: common.TYPE,
     card: {
       token:
-        common.STRIPE_TEST_CARD[
-          Object.keys(common.STRIPE_TEST_CARD)[
-            Math.floor(
-              Math.random() * Object.keys(common.STRIPE_TEST_CARD).length
-            )
-          ]
-        ],
+        // common.STRIPE_TEST_CARD[
+        //   Object.keys(common.STRIPE_TEST_CARD)[
+        //     Math.floor(
+        //       Math.random() * Object.keys(common.STRIPE_TEST_CARD).length
+        //     )
+        //   ]
+        // ],
+        "tok_chargeCustomerFail",
     },
     billing_details: paymentMethodData,
-  });
-  console.log({
-    type: common.TYPE,
-    card: {
-      token:
-        common.STRIPE_TEST_CARD[
-          Object.keys(common.STRIPE_TEST_CARD)[
-            Math.floor(
-              Math.random() * Object.keys(common.STRIPE_TEST_CARD).length
-            )
-          ]
-        ],
-    },
   });
   return paymentMethod;
 };
@@ -96,6 +84,21 @@ const updatePaymentMethodInStripe = async (
   return paymentMethod;
 };
 
+const getPaymentMethodOfUserFromStripe = async (
+  customerId,
+  limit,
+  paymentMethodId
+) => {
+  const paymentMethodOfUser = await stripe.customers.listPaymentMethods(
+    customerId,
+    {
+      limit: limit,
+      starting_after: paymentMethodId,
+    }
+  );
+  return { data: paymentMethodOfUser, hasMore: paymentMethodOfUser.has_more };
+};
+
 const getPaymentMethodInStripe = async (paymentMethodId) => {
   const paymentMethod = await stripe.paymentMethods.retrieve(paymentMethodId);
   return paymentMethod;
@@ -106,6 +109,67 @@ const detachPaymentMethodInStripe = async (paymentMethodId) => {
   return paymentMethod;
 };
 
+const createPaymentIntentInStripe = async ({
+  amount,
+  currency,
+  customerId,
+  paymentMethod,
+}) => {
+  try {
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: amount,
+      currency: currency || "usd",
+      customer: customerId,
+      payment_method: paymentMethod,
+    });
+    return paymentIntent;
+  } catch (error) {
+    console.log({ error });
+  }
+};
+
+const confirmPaymentIntentInStripe = async ({
+  paymentIntentId,
+  // paymentMethod,
+}) => {
+  try {
+    const paymentIntent = await stripe.paymentIntents.confirm(paymentIntentId, {
+      payment_method: "pm_1Qx0hnSHpKyhkVYhV73baOOl",
+      // payment_method: "pm_1QwFjkSHpKyhkVYhs56ZuEAq",
+      return_url: "https://www.youtube.com",
+    });
+    return paymentIntent;
+  } catch (error) {
+    console.log({ error });
+  }
+};
+
+const cancelPaymentIntentInStripe = async (paymentIntentId) => {
+  try {
+    const paymentIntent = await stripe.paymentIntents.cancel(paymentIntentId);
+    return paymentIntent;
+  } catch (error) {
+    console.log({ error });
+  }
+};
+
+const constructWebhookInStripe = async ({
+  rowData,
+  signature,
+  endpointSecret,
+}) => {
+  try {
+    const event = stripe.webhooks.constructEvent(
+      rowData,
+      signature,
+      endpointSecret
+    );
+    return event;
+  } catch (error) {
+    console.log({ error });
+  }
+};
+
 export default {
   createCustomerInStripe,
   createPriceInStripe,
@@ -114,6 +178,11 @@ export default {
   createPaymentMethodInStripe,
   attachCustomerToPaymentMethodInStripe,
   updatePaymentMethodInStripe,
+  getPaymentMethodOfUserFromStripe,
   getPaymentMethodInStripe,
   detachPaymentMethodInStripe,
+  createPaymentIntentInStripe,
+  confirmPaymentIntentInStripe,
+  cancelPaymentIntentInStripe,
+  constructWebhookInStripe,
 };

@@ -50,10 +50,14 @@ export const setDefaultPaymentMethod = async (req, res, next) => {
 export const getPaymentMethodOfUser = async (req, res, next) => {
   try {
     const userId = req.session.userId;
-    const page = req.query.page;
-    const limit = req.query.limit;
+    const limit = req.query.limit || 10;
+    const paymentMethodId = req.params.paymentMethodId;
     const paymentMethodOfUser =
-      await paymentMethodService.getPaymentMethodOfUser(userId, page, limit);
+      await paymentMethodService.getPaymentMethodOfUser(
+        userId,
+        paymentMethodId,
+        limit
+      );
     return res.status(200).json(paymentMethodOfUser);
   } catch (error) {
     console.log("error", "error in get payment method of user", error);

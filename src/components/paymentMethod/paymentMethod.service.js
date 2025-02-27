@@ -32,29 +32,37 @@ const createPaymentMethod = async (paymentMethodData, userId) => {
   }
 };
 
-const getPaymentMethodOfUser = async (userId, page, limit) => {
+const getPaymentMethodOfUser = async (userId, paymentMethodId, limit) => {
   try {
     const user = await userUtils.getUserById(userId);
     if (!user) {
       console.log("user not found in create payment method");
       throw new Error("USER_NOT_FOUND");
     }
-    if (user.defaultPaymentMethod && user.defaultPaymentMethod.id != "") {
-      user.paymentMethod.splice(
-        user.paymentMethod.findIndex(
-          (a) => a.id === user.defaultPaymentMethod.id
-        ),
-        1
+    // if (user.defaultPaymentMethod && user.defaultPaymentMethod.id != "") {
+    //   user.paymentMethod.splice(
+    //     user.paymentMethod.findIndex(
+    //       (a) => a.id === user.defaultPaymentMethod.id
+    //     ),
+    //     1
+    //   );
+    //   user.paymentMethod.unshift(user.defaultPaymentMethod);
+    // }
+    // return {
+    //   paymentMethod: user.paymentMethod.slice((page - 1) * limit, page * limit),
+    //   isDafaultSet:
+    //     user.defaultPaymentMethod && user.defaultPaymentMethod.id != ""
+    //       ? true
+    //       : false,
+    // };
+
+    const paymentMethodOfUser =
+      await stripeHelper.getPaymentMethodOfUserFromStripe(
+        user.customerId,
+        limit,
+        paymentMethodId
       );
-      user.paymentMethod.unshift(user.defaultPaymentMethod);
-    }
-    return {
-      paymentMethod: user.paymentMethod.slice((page - 1) * limit, page * limit),
-      isDafaultSet:
-        user.defaultPaymentMethod && user.defaultPaymentMethod.id != ""
-          ? true
-          : false,
-    };
+    return paymentMethodOfUser;
   } catch (error) {
     console.log("Error from get payment Method of user");
     throw new Error(error.message);
@@ -132,6 +140,13 @@ const deletePaymentMethodByPaymentMethodId = async (
       throw new Error("RESOURCE_NOT_FOUND");
     }
     await stripeHelper.detachPaymentMethodInStripe(paymentMethodId);
+    user.paymentMethod.splice(
+      user.paymentMethod.findIndex(
+        (a) => a.id === user.defaultPaymentMethod.id
+      ),
+      1
+    );
+    await userUtils.updateUserById(user._id, { ...user });
     return { msg: "Payment Method deleted successfully" };
   } catch (error) {
     console.log("Error from gdeleteet payment Method By payment method id");

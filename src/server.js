@@ -3,18 +3,30 @@ import bodyParser from "body-parser";
 import session from "express-session";
 import { redisClient, redisConnection } from "./lib/redisConnection.js";
 import errorCodes from "./constants/errorCodes.js";
-import userRoute from "./components/auth/auth.route.js";
 import { connectToDatabase } from "./lib/dbConnection.js";
 import { RedisStore } from "connect-redis";
 import config from "./config/config.js";
-import productRoute from "./components/product/product.route.js";
 import apiRoute from "./indexRoute.js";
+// import webhookController from "./components/webhook/webhook.controller.js";
 
 const port = config.port.port || 3000;
 const app = express();
-app.use(express.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+
+// app.post(
+//   "/webhook",
+//   express.raw({ type: "application/json" }),
+//   webhookController.listenToWebhook
+// );
+
+app.use((req, res, next) => {
+  if (req.originalUrl === "/api/webhook/") {
+    next();
+  } else {
+    bodyParser.json()(req, res, next);
+    // app.use(express.json());
+    // app.use(bodyParser.json());
+  }
+});
 
 app.use(
   session({

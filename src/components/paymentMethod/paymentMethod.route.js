@@ -25,11 +25,11 @@ paymentMethodRoute.post(
   updatePaymentMethod
 );
 paymentMethodRoute.post("/default/:paymentMethodId", setDefaultPaymentMethod);
-paymentMethodRoute.get("/", getPaymentMethodOfUser);
 paymentMethodRoute.get(
   "/stripe/:paymentMethodId",
   getPaymentMethodFromStripeById
 );
+paymentMethodRoute.get("/:paymentMethodId", getPaymentMethodOfUser);
 paymentMethodRoute.delete("/:paymentMethodId", deletePaymentMethodById);
 
 export default paymentMethodRoute;
