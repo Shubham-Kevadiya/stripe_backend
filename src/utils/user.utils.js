@@ -26,7 +26,13 @@ const getUserByEmail = async (email) => {
 };
 
 const updateUserById = async (userData) => {
-  const user = await UserModel.findByIdAndUpdate(userData.userId, userData);
+  const user = await UserModel.findByIdAndUpdate(
+    userData.userId,
+    {
+      ...userData,
+    },
+    { new: true }
+  );
   return user;
 };
 

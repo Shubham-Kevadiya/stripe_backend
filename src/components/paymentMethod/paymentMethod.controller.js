@@ -51,14 +51,12 @@ export const getPaymentMethodOfUser = async (req, res, next) => {
   try {
     const userId = req.session.userId;
     const limit = req.query.limit || 10;
-    const paymentMethodId = req.params.paymentMethodId;
     const paymentMethodOfUser =
-      await paymentMethodService.getPaymentMethodOfUser(
-        userId,
-        paymentMethodId,
-        limit
-      );
-    return res.status(200).json(paymentMethodOfUser);
+      await paymentMethodService.getPaymentMethodOfUser(userId, limit);
+    return res.status(200).json({
+      paymentMethod: paymentMethodOfUser.data.data,
+      has_more: paymentMethodOfUser.hasMore,
+    });
   } catch (error) {
     console.log("error", "error in get payment method of user", error);
     next(error);

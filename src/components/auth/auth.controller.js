@@ -20,7 +20,7 @@ const login = async (req, res, next) => {
     const user = await authService.userLogin(payloadValue);
 
     req.session.userId = user._id;
-    req.session.cookie.maxAge = 60 * 60 * 1000;
+    // req.session.cookie.maxAge = 60 * 60 * 1000;
 
     return res.status(200).json(user);
   } catch (error) {

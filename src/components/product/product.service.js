@@ -1,22 +1,85 @@
 import productUtils from "../../utils/product.utils.js";
-import { ProductModel } from "../../model/product.model.js";
 import stripeHelper from "../../helper/stripe.helper.js";
 
 const createProduct = async (productData) => {
   try {
-    const price = await stripeHelper.createPriceInStripe(productData);
-    const product = await productUtils.saveProduct(
-      new ProductModel({
-        ...productData,
-        price: productData.price,
-        stripeProductId: price.product,
-        priceId: price.id,
-        currency: productData.currency,
-      })
+    const existingProduct = await productUtils.getProductByName(
+      productData.name
     );
-    delete product.priceId;
-    delete product.productIid;
-    return product;
+    if (existingProduct) {
+      console.log("Error from create product, product name repeated");
+      throw new Error("PRODUCT_ALREADY_EXIST");
+    }
+    let oneTimePriceArr = [];
+    let recurringPriceArr = [];
+    const product = await stripeHelper.createProductInStripe(productData.name);
+    // for await (const price of productData.price) {
+    //   const oneTimePrice = await stripeHelper.createPriceInStripe({
+    //     currency: productData.currency,
+    //     unit_amount: price.amount * 100,
+    //     product: product.id,
+    //   });
+    //   oneTimePriceArr.push({
+    //     stripePriceId: oneTimePrice.id,
+    //     interval: price.interval,
+    //     price: price.amount,
+    //   });
+    //   const recurringPrice = await stripeHelper.createPriceInStripe({
+    //     currency: productData.currency,
+    //     unit_amount: price.amount * 100,
+    //     product: product.id,
+    //     recurring: {
+    //       interval: price.interval,
+    //     },
+    //   });
+    //   recurringPriceArr.push({
+    //     stripePriceId: recurringPrice.id,
+    //     interval: price.interval,
+    //     price: price.amount,
+    //   });
+    // }
+    if (productData.oneTimePrice) {
+      for await (const price of productData.oneTimePrice) {
+        const oneTimePrice = await stripeHelper.createPriceInStripe({
+          currency: productData.currency,
+          unit_amount: price.amount * 100,
+          product: product.id,
+        });
+        oneTimePriceArr.push({
+          stripePriceId: oneTimePrice.id,
+          interval: price.interval,
+          price: price.amount,
+        });
+      }
+    }
+    if (productData.subscriptionPrice) {
+      for await (const price of productData.subscriptionPrice) {
+        const recurringPrice = await stripeHelper.createPriceInStripe({
+          currency: productData.currency,
+          unit_amount: price.amount * 100,
+          product: product.id,
+          recurring: {
+            interval: price.interval,
+          },
+        });
+        recurringPriceArr.push({
+          stripePriceId: recurringPrice.id,
+          interval: price.interval,
+          price: price.amount,
+        });
+      }
+    }
+
+    const savedProduct = await productUtils.saveProduct({
+      name: productData.name,
+      stripeProductId: product.id,
+      currency: productData.currency,
+      stripePriceForOneTime: oneTimePriceArr,
+      stripePriceForRecurring: recurringPriceArr,
+    });
+    delete savedProduct.stripePriceForOneTime;
+    delete savedProduct.stripePriceForRecurring;
+    return savedProduct;
   } catch (error) {
     throw new Error(error.message);
   }
@@ -31,25 +94,96 @@ const updateProduct = async (productData) => {
       console.log("Product not found to update");
       throw new Error("RESOURCE_NOT_FOUND");
     }
-    if (productData.price || productData.currency) {
-      const price = await stripeHelper.createPriceInStripe({
-        currency: productData.currency
-          ? productData.currency
-          : existingProduct.currency,
-        price: productData.price
-          ? productData.price * 100
-          : existingProduct.price,
-        product: existingProduct.stripeProductId,
-      });
-      await stripeHelper.updatePriceInStripe(existingProduct.priceId, false);
-      productData.priceId = price.id;
-      productData.stripeProductId = existingProduct.stripeProductId;
+    if (productData.name) {
+      const productWithSameName = await productUtils.getProductByName(
+        productData.name
+      );
+      if (
+        productWithSameName &&
+        productWithSameName._id.toString() != existingProduct._id.toString()
+      ) {
+        console.log("Error from update product, product name repeated");
+        throw new Error("PRODUCT_NAME_ALREADY_EXIST");
+      }
     }
-    const product = await productUtils.updateProductById(productData);
-    delete product.priceId;
-    delete product.stripeProductId;
+    let oneTimePriceArr = [];
+    let recurringPriceArr = [];
+    if (productData.oneTimePrice && productData.oneTimePrice.length > 0) {
+      for (let i = 0; i < existingProduct.stripePriceForOneTime.length; i++) {
+        await stripeHelper.deletePriceInStripe(
+          existingProduct.stripePriceForOneTime[i].stripePriceId,
+          false
+        );
+      }
+      for await (const price of productData.oneTimePrice) {
+        const oneTimePrice = await stripeHelper.createPriceInStripe({
+          currency: productData.currency
+            ? productData.currency
+            : existingProduct.currency,
+          unit_amount: price.amount * 100,
+          product: existingProduct.stripeProductId,
+        });
+        oneTimePriceArr.push({
+          stripePriceId: oneTimePrice.id,
+          interval: price.interval,
+          price: price.amount,
+        });
+      }
+    }
+
+    if (
+      productData.subscriptionPrice &&
+      productData.subscriptionPrice.length > 0
+    ) {
+      for (let i = 0; i < existingProduct.stripePriceForRecurring.length; i++) {
+        await stripeHelper.deletePriceInStripe(
+          existingProduct.stripePriceForRecurring[i].stripePriceId,
+          false
+        );
+      }
+      for await (const price of productData.subscriptionPrice) {
+        const recurringPrice = await stripeHelper.createPriceInStripe({
+          currency: productData.currency
+            ? productData.currency
+            : existingProduct.currency,
+          unit_amount: price.amount * 100,
+          product: existingProduct.stripeProductId,
+          recurring: {
+            interval: price.interval,
+          },
+        });
+        recurringPriceArr.push({
+          stripePriceId: recurringPrice.id,
+          interval: price.interval,
+          price: price.amount,
+        });
+      }
+    }
+
+    if (productData.name) {
+      await stripeHelper.updateProductNameInStripe(
+        existingProduct.stripeProductId,
+        productData.name
+      );
+    }
+    const product = await productUtils.updateProductById({
+      name: productData.name ? productData.name : existingProduct.name,
+      productId: existingProduct._id,
+      currency: productData.currency
+        ? productData.currency
+        : existingProduct.currency,
+      stripePriceForOneTime:
+        productData.price || productData.currency
+          ? oneTimePriceArr
+          : existingProduct.stripePriceForOneTime,
+      stripePriceForRecurring:
+        productData.price || productData.currency
+          ? recurringPriceArr
+          : existingProduct.stripePriceForRecurring,
+    });
     return product;
   } catch (error) {
+    console.log("Error from update product", { error });
     throw new Error(error.message);
   }
 };
@@ -57,8 +191,6 @@ const updateProduct = async (productData) => {
 const getProducts = async (page, limit) => {
   try {
     const product = await productUtils.getAllProduct(page, limit);
-    delete product.priceId;
-    delete product.productId;
     return product;
   } catch (error) {
     throw new Error(error.message);
@@ -72,18 +204,42 @@ const getProductById = async (productId) => {
       console.log("product not found");
       throw new Error("NOT_FOUND");
     }
-    delete product.priceId;
-    delete product.productId;
     return product;
   } catch (error) {
     throw new Error(error.message);
   }
 };
 
+// const getProductByType = async (type) => {
+//   try {
+//     const product = await productUtils.getProductById(productId);
+//     if (!product) {
+//       console.log("product not found");
+//       throw new Error("NOT_FOUND");
+//     }
+//     return product;
+//   } catch (error) {
+//     throw new Error(error.message);
+//   }
+// };
+
 const deleteProduct = async (productId) => {
   try {
     const existingProduct = await productUtils.getProductById(productId);
-    await stripeHelper.updatePriceInStripe(existingProduct.priceId, false);
+    if (!existingProduct) {
+      console.log("Product not found to delete");
+      throw new Error("RESOURCE_NOT_FOUND");
+    }
+    for (let i = 0; i < existingProduct.stripePriceForOneTime.length; i++) {
+      await stripeHelper.deletePriceInStripe(
+        existingProduct.stripePriceForOneTime[i].stripePriceId,
+        false
+      );
+      await stripeHelper.deletePriceInStripe(
+        existingProduct.stripePriceForRecurring[i].stripePriceId,
+        false
+      );
+    }
     await stripeHelper.deleteProductInStripe(existingProduct.productId);
     await productUtils.deleteProductById(productId);
     return "Product Deleted Successfully";
@@ -97,5 +253,6 @@ export default {
   updateProduct,
   getProducts,
   getProductById,
+  // getProductByType,
   deleteProduct,
 };

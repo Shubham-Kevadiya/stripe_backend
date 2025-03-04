@@ -56,6 +56,20 @@ export default {
       message: "User Already Exist",
     },
   },
+  PRODUCT_ALREADY_EXIST: {
+    httpStatusCode: 401,
+    body: {
+      code: "product_already_exist",
+      message: "Product Already Exist",
+    },
+  },
+  PRODUCT_NAME_ALREADY_EXIST: {
+    httpStatusCode: 401,
+    body: {
+      code: "product_name_already_exist",
+      message: "Product Name Already Exist",
+    },
+  },
   INVALID_PASSWORD: {
     httpStatusCode: 401,
     body: {
@@ -68,6 +82,13 @@ export default {
     body: {
       code: "not_found",
       message: "Not Found",
+    },
+  },
+  BAD_CREDENTIALS: {
+    httpStatusCode: 422,
+    body: {
+      code: "bad_credentials",
+      message: "invalid data - Cannot process the request.",
     },
   },
 };

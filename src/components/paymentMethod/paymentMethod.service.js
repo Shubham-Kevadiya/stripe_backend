@@ -59,8 +59,7 @@ const getPaymentMethodOfUser = async (userId, paymentMethodId, limit) => {
     const paymentMethodOfUser =
       await stripeHelper.getPaymentMethodOfUserFromStripe(
         user.customerId,
-        limit,
-        paymentMethodId
+        limit
       );
     return paymentMethodOfUser;
   } catch (error) {

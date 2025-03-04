@@ -26,7 +26,7 @@ const registerUser = async (userData) => {
       email: user.email,
     });
     user.customerId = customer.id;
-    await userUtils.updateUserById(user);
+    await userUtils.updateUserById({ ...user, userId: user._id });
     return user;
   } catch (error) {
     throw new Error(error.message);

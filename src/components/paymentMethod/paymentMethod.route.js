@@ -12,24 +12,40 @@ import {
   setDefaultPaymentMethod,
   updatePaymentMethod,
 } from "./paymentMethod.controller.js";
+import authenticateUser from "../../middleware/authenticateUser.js";
 const paymentMethodRoute = express.Router();
 
 paymentMethodRoute.post(
   "/create",
+  authenticateUser.validateAuthIdToken,
   paymentMethodValidate.validateBodySchema(createPaymentMethodSchema),
   createPaymentMethod
 );
-paymentMethodRoute.post(
+paymentMethodRoute.put(
   "/update/:paymentMethodId",
+  authenticateUser.validateAuthIdToken,
   paymentMethodValidate.validateBodySchema(updatePaymentMethodSchema),
   updatePaymentMethod
 );
-paymentMethodRoute.post("/default/:paymentMethodId", setDefaultPaymentMethod);
+paymentMethodRoute.put(
+  "/default/:paymentMethodId",
+  authenticateUser.validateAuthIdToken,
+  setDefaultPaymentMethod
+);
 paymentMethodRoute.get(
   "/stripe/:paymentMethodId",
+  authenticateUser.validateAuthIdToken,
   getPaymentMethodFromStripeById
 );
-paymentMethodRoute.get("/:paymentMethodId", getPaymentMethodOfUser);
-paymentMethodRoute.delete("/:paymentMethodId", deletePaymentMethodById);
+paymentMethodRoute.get(
+  "/",
+  authenticateUser.validateAuthIdToken,
+  getPaymentMethodOfUser
+);
+paymentMethodRoute.delete(
+  "/:paymentMethodId",
+  authenticateUser.validateAuthIdToken,
+  deletePaymentMethodById
+);
 
 export default paymentMethodRoute;

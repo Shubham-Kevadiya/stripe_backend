@@ -7,13 +7,18 @@ const paymentSchema = new mongoose.Schema(
       ref: "user",
       required: true,
     },
+    planId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "product",
+      required: true,
+    },
     stripePaymentId: {
       type: String,
       require: true,
     }, // id of intent or subscription
     paymentType: {
       type: String,
-      enum: ["Intent", "Subscription"],
+      enum: ["intent", "subscription"],
       require: true,
     },
     amount: {
@@ -40,6 +45,10 @@ const paymentSchema = new mongoose.Schema(
       type: String,
       enum: ["Processing", "Completed", "Failed"],
       default: "Processing",
+    },
+    reason: {
+      type: String,
+      default: "",
     },
   },
   { timestamps: true, versionKey: false }

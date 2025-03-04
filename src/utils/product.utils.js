@@ -13,7 +13,12 @@ const getAllProduct = async (page, limit) => {
 };
 
 const getProductById = async (productId) => {
-  const product = await ProductModel.findById(productId);
+  const product = await ProductModel.findById(productId).lean();
+  return product;
+};
+
+const getProductByName = async (productName) => {
+  const product = await ProductModel.findOne({ name: productName });
   return product;
 };
 
@@ -21,7 +26,7 @@ const updateProductById = async (productData) => {
   const product = await getProductById(productData.productId);
   if (!product) {
     console.log("product not found");
-    throw new Error("NOT_FOUND");
+    throw new Error("RESOURCE_NOT_FOUND");
   }
   const updatedProduct = await ProductModel.findByIdAndUpdate(
     productData.productId,
@@ -43,10 +48,17 @@ const deleteProductById = async (productId) => {
   return "product deleted successsfully !";
 };
 
+const countDocuments = async (query) => {
+  const documents = await ProductModel.countDocuments(query);
+  return documents;
+};
+
 export default {
   saveProduct,
   getAllProduct,
   getProductById,
+  getProductByName,
   updateProductById,
   deleteProductById,
+  countDocuments,
 };
