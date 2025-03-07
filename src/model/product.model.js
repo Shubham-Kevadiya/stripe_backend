@@ -6,15 +6,7 @@ const productSchema = new mongoose.Schema(
       type: String,
       require: true,
     },
-    price: {
-      type: Number,
-      require: true,
-    },
-    price_id: {
-      type: String,
-      require: true,
-    },
-    product_id: {
+    stripeProductId: {
       type: String,
       require: true,
     },
@@ -22,8 +14,30 @@ const productSchema = new mongoose.Schema(
       type: String,
       require: true,
     },
+    stripePriceForOneTime: [
+      {
+        stripePriceId: { type: String, require: true },
+        interval: {
+          type: String,
+          enum: ["week", "month", "year"],
+          require: true,
+        },
+        price: { type: Number, require: true },
+      },
+    ],
+    stripePriceForRecurring: [
+      {
+        stripePriceId: { type: String, require: true },
+        interval: {
+          type: String,
+          enum: ["week", "month", "year"],
+          require: true,
+        },
+        price: { type: Number, require: true },
+      },
+    ],
   },
-  { timestamps: true }
+  { timestamps: true, versionKey: false }
 );
 
 export const ProductModel = new mongoose.model("product", productSchema);

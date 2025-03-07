@@ -17,12 +17,12 @@ const login = async (req, res, next) => {
   try {
     const payloadValue = req.body;
 
-    const loggedInUser = await authService.userLogin(payloadValue);
+    const user = await authService.userLogin(payloadValue);
 
-    req.session.userId = loggedInUser._id;
-    req.session.cookie.maxAge = 10 * 60 * 1000;
+    req.session.userId = user._id;
+    // req.session.cookie.maxAge = 60 * 60 * 1000;
 
-    return res.status(200).json({ user: loggedInUser });
+    return res.status(200).json(user);
   } catch (error) {
     console.log("error", "error in login", error);
     next(error);

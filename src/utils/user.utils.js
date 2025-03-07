@@ -15,13 +15,24 @@ const getUserById = async (userId) => {
   return user;
 };
 
+const getUserByStripeCustomerId = async (customerId) => {
+  const user = await UserModel.findOne({ customerId }).lean();
+  return user;
+};
+
 const getUserByEmail = async (email) => {
   const user = await UserModel.findOne({ email });
   return user;
 };
 
 const updateUserById = async (userData) => {
-  const user = await UserModel.findByIdAndUpdate(userData._id, { ...userData });
+  const user = await UserModel.findByIdAndUpdate(
+    userData.userId,
+    {
+      ...userData,
+    },
+    { new: true }
+  );
   return user;
 };
 
@@ -34,6 +45,7 @@ export default {
   saveUser,
   getAllUser,
   getUserById,
+  getUserByStripeCustomerId,
   getUserByEmail,
   updateUserById,
   deleteUserById,

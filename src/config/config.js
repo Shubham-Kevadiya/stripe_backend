@@ -23,5 +23,6 @@ export default {
   },
   stipe: {
     secret_key: process.env.STRIPE_SECRET_KEY,
+    webhook_secret: process.env.WEBHOOK_SERET,
   },
 };

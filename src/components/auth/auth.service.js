@@ -1,8 +1,8 @@
 import CryptoJS from "crypto-js";
-import Stripe from "stripe";
 import userUtils from "../../utils/user.utils.js";
 import config from "../../config/config.js";
 import { UserModel } from "../../model/user.model.js";
+import stripeHelper from "../../helper/stripe.helper.js";
 
 const registerUser = async (userData) => {
   try {
@@ -12,6 +12,7 @@ const registerUser = async (userData) => {
       console.log("User already exist with same email");
       throw new Error("USER_ALREADY_EXIST");
     }
+    // think about this test case :: find customer from stripe using name and email to prevent duplication of user in stripe. what if user delete his account and recreate it.
     user = await userUtils.saveUser(
       new UserModel({
         ...userData,
@@ -21,13 +22,12 @@ const registerUser = async (userData) => {
         ).toString(),
       })
     );
-    const stripe = Stripe(config.stipe.secret_key);
-    const customer = await stripe.customers.create({
+    const customer = await stripeHelper.createCustomerInStripe({
       name: user.name,
       email: user.email,
     });
     user.customerId = customer.id;
-    await userUtils.cryptoupdateUserById(user);
+    await userUtils.updateUserById({ ...user, userId: user._id });
     return user;
   } catch (error) {
     throw new Error(error.message);
