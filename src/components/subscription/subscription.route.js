@@ -14,6 +14,14 @@ subscriptionRoute.post(
   ),
   subscriptionController.createSubscription
 );
+subscriptionRoute.post(
+  "/update/:subscriptionId",
+  authenticateUser.validateAuthIdToken,
+  subscriptionValidate.validateBodySchema(
+    subscriptionValidateSchema.updateSubscriptionSchema
+  ),
+  subscriptionController.updateSubscription
+);
 subscriptionRoute.put(
   "/pause/:subscriptionId",
   authenticateUser.validateAuthIdToken,
@@ -34,7 +42,7 @@ subscriptionRoute.delete(
   "/cancel/:subscriptionId",
   authenticateUser.validateAuthIdToken,
   subscriptionValidate.validateBodySchema(
-    subscriptionValidateSchema.validatePurchaseIdSchema
+    subscriptionValidateSchema.cancelSubscriptionSchema
   ),
   subscriptionController.cancelSubscription
 );
@@ -43,13 +51,5 @@ subscriptionRoute.delete(
 //   authenticateUser.validateAuthIdToken,
 //   subscriptionController.getUpcomingInvoiceOfCustomer
 // );
-subscriptionRoute.post(
-  "/filter/user",
-  authenticateUser.validateAuthIdToken,
-  subscriptionValidate.validateBodySchema(
-    subscriptionValidateSchema.getAllFilteredSubscriptionOfUserSchema
-  ),
-  subscriptionController.getAllFilteredSubscriptionOfUser
-);
 
 export default subscriptionRoute;

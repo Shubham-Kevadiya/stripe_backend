@@ -12,7 +12,7 @@ const apiRoute = express.Router();
 apiRoute.use("/users", userRoute);
 apiRoute.use("/plans", productRoute);
 apiRoute.use("/paymentMethods", paymentMethodRoute);
-apiRoute.use("/paymentIntents", paymentIntentRoute);
+apiRoute.use("/one-time", paymentIntentRoute);
 apiRoute.use("/subscriptions", subscriptionRoute);
 apiRoute.use("/purchases", purchaseRoute);
 apiRoute.use("/webhook", webhookRoute);

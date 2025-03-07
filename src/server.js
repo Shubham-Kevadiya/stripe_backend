@@ -1,30 +1,23 @@
 import express from "express";
 import bodyParser from "body-parser";
 import session from "express-session";
+import swaggerUi from "swagger-ui";
+import swaggerJSDoc from "swagger-jsdoc";
 import { redisClient, redisConnection } from "./lib/redisConnection.js";
 import errorCodes from "./constants/errorCodes.js";
 import { connectToDatabase } from "./lib/dbConnection.js";
 import { RedisStore } from "connect-redis";
 import config from "./config/config.js";
 import apiRoute from "./indexRoute.js";
-// import webhookController from "./components/webhook/webhook.controller.js";
 
 const port = config.port.port || 3000;
 const app = express();
-
-// app.post(
-//   "/webhook",
-//   express.raw({ type: "application/json" }),
-//   webhookController.listenToWebhook
-// );
 
 app.use((req, res, next) => {
   if (req.originalUrl === "/api/webhook/") {
     next();
   } else {
     bodyParser.json()(req, res, next);
-    // app.use(express.json());
-    // app.use(bodyParser.json());
   }
 });
 
@@ -41,6 +34,8 @@ app.use(
 app.use("/api", apiRoute);
 
 app.use("/", (err, req, res, next) => {
+  console.log({ err });
+
   const errorNames = Object.keys(errorCodes);
   const errorMsg = err.message;
   const errorMatch = errorNames.includes(errorMsg);
@@ -50,7 +45,7 @@ app.use("/", (err, req, res, next) => {
     const message = errorCodes[errorMsg].body.message;
     res.status(status).json({ code, message });
   } else {
-    res.status(500).json({
+    res.status(err.status || 500).json({
       code: err.code || "server crashed",
       message: err.message || "Server Crashed",
     });

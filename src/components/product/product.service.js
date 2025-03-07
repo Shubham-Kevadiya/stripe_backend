@@ -13,31 +13,6 @@ const createProduct = async (productData) => {
     let oneTimePriceArr = [];
     let recurringPriceArr = [];
     const product = await stripeHelper.createProductInStripe(productData.name);
-    // for await (const price of productData.price) {
-    //   const oneTimePrice = await stripeHelper.createPriceInStripe({
-    //     currency: productData.currency,
-    //     unit_amount: price.amount * 100,
-    //     product: product.id,
-    //   });
-    //   oneTimePriceArr.push({
-    //     stripePriceId: oneTimePrice.id,
-    //     interval: price.interval,
-    //     price: price.amount,
-    //   });
-    //   const recurringPrice = await stripeHelper.createPriceInStripe({
-    //     currency: productData.currency,
-    //     unit_amount: price.amount * 100,
-    //     product: product.id,
-    //     recurring: {
-    //       interval: price.interval,
-    //     },
-    //   });
-    //   recurringPriceArr.push({
-    //     stripePriceId: recurringPrice.id,
-    //     interval: price.interval,
-    //     price: price.amount,
-    //   });
-    // }
     if (productData.oneTimePrice) {
       for await (const price of productData.oneTimePrice) {
         const oneTimePrice = await stripeHelper.createPriceInStripe({
@@ -210,19 +185,6 @@ const getProductById = async (productId) => {
   }
 };
 
-// const getProductByType = async (type) => {
-//   try {
-//     const product = await productUtils.getProductById(productId);
-//     if (!product) {
-//       console.log("product not found");
-//       throw new Error("NOT_FOUND");
-//     }
-//     return product;
-//   } catch (error) {
-//     throw new Error(error.message);
-//   }
-// };
-
 const deleteProduct = async (productId) => {
   try {
     const existingProduct = await productUtils.getProductById(productId);
@@ -253,6 +215,5 @@ export default {
   updateProduct,
   getProducts,
   getProductById,
-  // getProductByType,
   deleteProduct,
 };

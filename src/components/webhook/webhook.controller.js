@@ -10,7 +10,7 @@ const listenToWebhook = async (req, res, next) => {
       signature,
       endpointSecret: config.stipe.webhook_secret,
     });
-    console.log({ event: event.type });
+    // console.log({ event: event.type });
     return res.json({ received: true });
   } catch (error) {
     console.log("error", "error in webhook event", error);

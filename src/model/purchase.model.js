@@ -11,6 +11,10 @@ const purchaseSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "payment",
     },
+    paymentMethod: {
+      id: { type: String },
+      type: { type: String },
+    },
     planId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "product",
@@ -44,12 +48,14 @@ const purchaseSchema = new mongoose.Schema(
     },
     nextPaymentDate: {
       type: Date,
-      default: "",
+      default: null,
     },
-    invoiceURL: {
-      type: String,
-      default: "",
-    },
+    transactionHistory: [
+      {
+        type: Object,
+        default: "",
+      },
+    ],
     isFinished: {
       type: Boolean,
       default: false,

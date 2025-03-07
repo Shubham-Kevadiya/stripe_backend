@@ -7,10 +7,12 @@ import authenticateUser from "../../middleware/authenticateUser.js";
 const purchaseRoute = express.Router();
 
 purchaseRoute.post(
-  "/create",
+  "/filter/user",
   authenticateUser.validateAuthIdToken,
-  validation.validateBodySchema(purchaseValidate.createPurchaseSchema),
-  purchaseController.createPurchase
+  validation.validateBodySchema(
+    purchaseValidate.getAllFilteredPurchaseOfUserSchema
+  ),
+  purchaseController.getAllFilteredPurchaseOfUser
 );
 
 export default purchaseRoute;

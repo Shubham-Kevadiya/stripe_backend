@@ -16,9 +16,10 @@ const createPaymentIntent = async (paymentData) => {
     const paymentMethods = user.paymentMethod.map((a) => {
       return a.id;
     });
+
     if (!paymentMethods.includes(paymentData.paymentMethod.id)) {
       console.log("user has no payment method with this id");
-      throw new Error("RESOURCE_NOT_FOUND");
+      throw new Error("CARD_NOT_OWNED_BY_USER");
     }
     const plan = await productUtils.getProductById(paymentData.planId);
     if (!plan) {
@@ -32,19 +33,14 @@ const createPaymentIntent = async (paymentData) => {
       console.log(
         "payment method not found in stripe in create payment intent"
       );
-      throw new Error("RESOURCE_NOT_FOUND");
-    }
-    if (paymentMethod.card.country != "IN") {
-      paymentData.description = "IT Service Intent";
+      throw new Error("PAYMENT_METHOD_NOT_FOUND");
     }
     const paymentIntent = await stripeHelper.createPaymentIntentInStripe({
       amount: paymentData.amount * 100,
       currency: plan.currency,
-      // isAutoPaymentSetup: paymentData.isAutoPaymentSetup,
       customerId: user.customerId,
       paymentMethod: paymentData.paymentMethod.id,
-      description: paymentData.description ? paymentData.description : "",
-      // paymentMethodType: "card",
+      description: (paymentData.description = "IT Service Intent"),
     });
     const payment = await paymentUtils.savePayment(
       new PaymentModel({
@@ -59,9 +55,9 @@ const createPaymentIntent = async (paymentData) => {
     );
     const purchase = await purchaseUtils.savePurchase({
       userId: user._id,
-      planType: paymentData.planType,
+      planType: common.PLAN_TYPE.ONE_TIME,
       amount: paymentData.amount,
-      interval: paymentData.interval,
+      interval: common.INTERVAL.YEAR,
       planId: plan._id,
     });
     await stripeHelper.updatePaymentIntentInStripe(paymentIntent.id, {
@@ -69,8 +65,10 @@ const createPaymentIntent = async (paymentData) => {
     });
     return payment;
   } catch (error) {
-    console.log("Error from create payment intent", { error });
-
+    console.log("Error from create payment intent", {
+      code: error.statusCode,
+      message: error.message,
+    });
     throw new Error(error.message);
   }
 };

@@ -12,6 +12,13 @@ export const createPaymentMethodSchema = Joi.object({
     postal_code: Joi.string().required(),
     state: Joi.string().required(),
   }),
+  // cardData: Joi.object({
+  //   cvc: Joi.string().required(),
+  //   exp_month: Joi.string().required(),
+  //   exp_year: Joi.string().required(),
+  //   number: Joi.string().required(),
+  // }),
+  token: Joi.string().required(),
 });
 
 export const updatePaymentMethodSchema = Joi.object({

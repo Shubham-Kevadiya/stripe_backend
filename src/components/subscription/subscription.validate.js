@@ -15,21 +15,22 @@ const createSubscriptionSchema = Joi.object({
   amount: Joi.number().required(),
 });
 
+const updateSubscriptionSchema = Joi.object({
+  paymentMethodId: Joi.string().required(),
+});
+
 const validatePurchaseIdSchema = Joi.object({
   purchaseId: Joi.string().required(),
 });
 
-const getAllFilteredSubscriptionOfUserSchema = Joi.object({
-  isCanceled: Joi.boolean().optional(),
-  isPaused: Joi.boolean().optional(),
-  isFinished: Joi.boolean().optional(),
-  isActive: Joi.boolean().optional(),
-  paymentFailed: Joi.boolean().optional(),
-  type: Joi.string().valid("one-time", "subscription").optional(),
+const cancelSubscriptionSchema = Joi.object({
+  purchaseId: Joi.string().required(),
+  reason: Joi.string().required(),
 });
 
 export default {
   createSubscriptionSchema,
+  updateSubscriptionSchema,
   validatePurchaseIdSchema,
-  getAllFilteredSubscriptionOfUserSchema,
+  cancelSubscriptionSchema,
 };

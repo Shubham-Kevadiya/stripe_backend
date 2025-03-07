@@ -1,11 +1,14 @@
 import Joi from "joi";
 
-const createPurchaseSchema = Joi.object({
-  planType: Joi.string().required(),
-  amount: Joi.number().required(),
-  interval: Joi.string().required(),
+const getAllFilteredPurchaseOfUserSchema = Joi.object({
+  isCanceled: Joi.boolean().optional(),
+  isPaused: Joi.boolean().optional(),
+  isFinished: Joi.boolean().optional(),
+  isActive: Joi.boolean().optional(),
+  paymentFailed: Joi.boolean().optional(),
+  type: Joi.string().valid("one-time", "subscription").optional(),
 });
 
 export default {
-  createPurchaseSchema,
+  getAllFilteredPurchaseOfUserSchema,
 };

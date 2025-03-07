@@ -5,7 +5,7 @@ const createProductSchema = Joi.object({
   oneTimePrice: Joi.array()
     .items(
       Joi.object({
-        interval: Joi.string().valid("Week", "month", "year").required(),
+        interval: Joi.string().valid("week", "month", "year").required(),
         amount: Joi.number().required(),
       })
     )
@@ -13,7 +13,7 @@ const createProductSchema = Joi.object({
   subscriptionPrice: Joi.array()
     .items(
       Joi.object({
-        interval: Joi.string().valid("Week", "month", "year").required,
+        interval: Joi.string().valid("week", "month", "year").required(),
         amount: Joi.number().required(),
       })
     )

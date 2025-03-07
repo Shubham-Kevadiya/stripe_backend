@@ -18,7 +18,24 @@ const getPurchaseById = async (purchaseId) => {
 };
 
 const getFilteredPurchaseOfUser = async (query) => {
-  const purchase = await PurchaseModel.find(query).lean();
+  const purchase = await PurchaseModel.find(query)
+    .populate({
+      path: "userId",
+      select: "name email age address userType",
+    })
+    .populate({
+      path: "planId",
+      select: "-createdAt -updatedAt",
+    })
+    .populate({
+      path: "paymentId",
+    })
+    .lean();
+  return purchase;
+};
+
+const getPurchaseByPaymentMethod = async (query) => {
+  const purchase = await PurchaseModel.findOne(query).lean();
   return purchase;
 };
 
@@ -51,6 +68,7 @@ export default {
   getAllPurchase,
   getPurchaseById,
   getFilteredPurchaseOfUser,
+  getPurchaseByPaymentMethod,
   updatePurchaseById,
   deletePurchaseById,
 };

@@ -91,4 +91,33 @@ export default {
       message: "invalid data - Cannot process the request.",
     },
   },
+  CARD_USED_IN_ACTIVE_SUBSCRIPTION: {
+    httpStatusCode: 422,
+    body: {
+      code: "card_used_in_ative_subscription",
+      message:
+        "Your card is used in your active subscription. To delete your card please select other default card to pay subscription",
+    },
+  },
+  CARD_NOT_OWNED_BY_USER: {
+    httpStatusCode: 400,
+    body: {
+      code: "card_not_owned_by_user",
+      message: "You don't owned this card. Please enter valid card again",
+    },
+  },
+  PAYMENT_METHOD_NOT_FOUND: {
+    httpStatusCode: 400,
+    body: {
+      code: "payment_method_not_found",
+      message: "Payment method doesn't exist, please try again later",
+    },
+  },
+  INSUFFICIENT_BALANCE: {
+    httpStatusCode: 402,
+    body: {
+      code: "insufficient_balance",
+      message: "You do not have sufficient balance to pay",
+    },
+  },
 };

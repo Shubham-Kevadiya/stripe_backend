@@ -6,10 +6,10 @@ const createPaymentIntentSchema = Joi.object({
     type: Joi.string().required(),
   }),
   planId: Joi.string().required(),
-  planType: Joi.string().valid("one-time", "subscription").required(),
-  interval: Joi.string().valid("week", "month", "year").required(),
+  // planType: Joi.string().valid("one-time", "subscription").required(),
+  // interval: Joi.string().valid("week", "month", "year").required(),
   amount: Joi.number().required(),
-  isAutoPaymentSetup: Joi.boolean().required(),
+  // isAutoPaymentSetup: Joi.boolean().required(),
 });
 
 const confirmPaymentIntentSchema = Joi.object({

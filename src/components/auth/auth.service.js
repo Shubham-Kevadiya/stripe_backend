@@ -12,6 +12,7 @@ const registerUser = async (userData) => {
       console.log("User already exist with same email");
       throw new Error("USER_ALREADY_EXIST");
     }
+    // think about this test case :: find customer from stripe using name and email to prevent duplication of user in stripe. what if user delete his account and recreate it.
     user = await userUtils.saveUser(
       new UserModel({
         ...userData,

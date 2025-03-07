@@ -8,9 +8,33 @@ const createSubscription = async (req, res, next) => {
       ...payloadValue,
       userId,
     });
-    return res.status(200).json({ paymentURL: subscription });
+    return res.status(200).json({
+      subscription: {
+        id: subscription.id,
+        invoice: subscription.latest_invoice,
+      },
+    });
   } catch (error) {
     console.log("error", "error in create subscription", error);
+    next(error);
+  }
+};
+
+const updateSubscription = async (req, res, next) => {
+  try {
+    const payloadValue = req.body;
+    const userId = req.session.userId;
+    const subscriptionId = req.params.subscriptionId;
+    await subscriptionService.updateSubscription({
+      ...payloadValue,
+      subscriptionId,
+      userId,
+    });
+    return res.status(200).json({
+      msg: "Payment method updated successfully in subscription",
+    });
+  } catch (error) {
+    console.log("error", "error in update subscription", error);
     next(error);
   }
 };
@@ -79,26 +103,10 @@ const cancelSubscription = async (req, res, next) => {
 //   }
 // };
 
-const getAllFilteredSubscriptionOfUser = async (req, res, next) => {
-  try {
-    const userId = req.session.userId;
-    const payload = req.body;
-    const subscriptions =
-      await subscriptionService.getAllFilteredSubscriptionOfUser({
-        ...payload,
-        userId: userId,
-      });
-    return res.status(200).json({ subscriptions });
-  } catch (error) {
-    console.log("error", "error in get all filtered subscription", error);
-    next(error);
-  }
-};
-
 export default {
   createSubscription,
+  updateSubscription,
   pauseSubscription,
   resumeSubscription,
   cancelSubscription,
-  getAllFilteredSubscriptionOfUser,
 };

@@ -16,27 +16,24 @@ const createSubscription = async (subscriptionData) => {
     });
     if (!paymentMethods.includes(subscriptionData.paymentMethodId)) {
       console.log("user has no payment method with this id");
-      throw new Error("RESOURCE_NOT_FOUND");
+      throw new Error("PAYMENT_METHOD_NOT_FOUND");
     }
+    // let cancelAt;
+    // if (subscriptionData.interval == "week") {
+    //   cancelAt = new Date(new Date().setDate(new Date().getDate() + 7));
+    // } else if (subscriptionData.interval == "month") {
+    //   cancelAt = new Date(new Date().setMonth(new Date().getMonth() + 1));
+    // } else if (subscriptionData.interval == "year") {
+    //   cancelAt = new Date(new Date().setFullYear(new Date().getFullYear() + 1));
+    // }
+
     const subscription = await stripeHelper.createSubscriptionInStripe(
       subscriptionData.paymentMethodId,
       user.customerId,
-      subscriptionData.priceId
+      subscriptionData.priceId,
+      new Date(new Date().setFullYear(new Date().getFullYear() + 1))
     );
-    const purchase = await purchaseUtils.savePurchase({
-      userId: user._id,
-      planType: subscriptionData.planType,
-      amount: subscriptionData.amount,
-      interval: subscriptionData.interval,
-      planId: subscriptionData.planId,
-    });
-    await stripeHelper.updateSubscriptionInStripe(subscription.id, {
-      purchaseId: purchase._id.toString(),
-      planType: subscriptionData.planType,
-      amount: subscriptionData.amount,
-      interval: subscriptionData.interval,
-    });
-    await paymentUtils.savePayment({
+    const payment = await paymentUtils.savePayment({
       userId: user._id,
       stripePaymentId: subscription.id,
       paymentType: common.PAYMENT_TYPE.SUBSCRIPTION,
@@ -44,13 +41,43 @@ const createSubscription = async (subscriptionData) => {
       paymentMethod: { id: subscriptionData.paymentMethodId, type: "card" },
       planId: subscriptionData.planId,
     });
-    const invoice = await stripeHelper.getInvoiceByIdFromStripe(
-      subscription.latest_invoice
-    );
-    return invoice;
-    // return subscription;
+    const purchase = await purchaseUtils.savePurchase({
+      userId: user._id,
+      planType: subscriptionData.planType,
+      amount: subscriptionData.amount,
+      interval: subscriptionData.interval,
+      planId: subscriptionData.planId,
+      paymentId: payment._id,
+    });
+    await stripeHelper.updateSubscriptionInStripe(subscription.id, {
+      purchaseId: purchase._id.toString(),
+      planType: subscriptionData.planType,
+      amount: subscriptionData.amount,
+      interval: subscriptionData.interval,
+    });
+    return subscription;
   } catch (error) {
     console.log("Error from create subscription service", { error });
+    throw new Error(error.message);
+  }
+};
+
+const updateSubscription = async (subscriptionData) => {
+  try {
+    const user = await userUtils.getUserById(subscriptionData.userId);
+    if (!user) {
+      console.log("user not found in pause subscription");
+      throw new Error("USER_NOT_FOUND");
+    }
+
+    await stripeHelper.updatePaymentMethodOfSubscriptionInStripe(
+      subscriptionData.subscriptionId,
+      subscriptionData.paymentMethodId
+    );
+
+    return subscription;
+  } catch (error) {
+    console.log("Error from update subscription service", { error });
     throw new Error(error.message);
   }
 };
@@ -171,38 +198,10 @@ const cancelSubscription = async (subscriptionData) => {
   }
 };
 
-const getAllFilteredSubscriptionOfUser = async (data) => {
-  let filterQuery = {};
-  const user = await userUtils.getUserById(data.userId);
-  if (!user) {
-    console.log("user not found in get all filtered subscription");
-    throw new Error("USER_NOT_FOUND");
-  }
-  if (data.isActive) {
-    filterQuery.isCanceled = false;
-    filterQuery.isFinished = false;
-    filterQuery.paymentConfirmed = true;
-  }
-  if (data.paymentFailed) {
-    filterQuery.paymentConfirmed = false;
-  }
-  if (data.type == "subscription") {
-    filterQuery.planType = "subscription";
-  }
-  if (data.type == "one-time") {
-    filterQuery.planType = "one-time";
-  }
-  const subscriptions = await purchaseUtils.getFilteredPurchaseOfUser({
-    ...filterQuery,
-    userId: user._id.toString(),
-  });
-  return subscriptions;
-};
-
 export default {
   createSubscription,
+  updateSubscription,
   pauseSubscription,
   resumeSubscription,
   cancelSubscription,
-  getAllFilteredSubscriptionOfUser,
 };
