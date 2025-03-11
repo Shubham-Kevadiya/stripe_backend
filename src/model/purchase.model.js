@@ -7,10 +7,10 @@ const purchaseSchema = new mongoose.Schema(
       ref: "user",
       required: true,
     },
-    paymentId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "payment",
-    },
+    // paymentId: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "payment",
+    // },
     paymentMethod: {
       id: { type: String },
       type: { type: String },
@@ -52,8 +52,9 @@ const purchaseSchema = new mongoose.Schema(
     },
     transactionHistory: [
       {
-        type: Object,
-        default: "",
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "payment",
+        required: true,
       },
     ],
     isFinished: {

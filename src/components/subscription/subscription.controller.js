@@ -61,12 +61,17 @@ const resumeSubscription = async (req, res, next) => {
     const payloadValue = req.body;
     const userId = req.session.userId;
     const subscriptionId = req.params.subscriptionId;
-    await subscriptionService.resumeSubscription({
+    const invoiceToPay = await subscriptionService.resumeSubscription({
       ...payloadValue,
       userId,
       subscriptionId,
     });
-    return res.status(200).json({ msg: "subscription resume successfully" });
+    return res
+      .status(200)
+      .json({
+        msg: "subscription resume successfully",
+        url: invoiceToPay ? invoiceToPay : "",
+      });
   } catch (error) {
     console.log("error", "error in resume subscription", error);
     next(error);

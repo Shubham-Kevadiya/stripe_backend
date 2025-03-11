@@ -14,7 +14,7 @@ subscriptionRoute.post(
   ),
   subscriptionController.createSubscription
 );
-subscriptionRoute.post(
+subscriptionRoute.put(
   "/update/:subscriptionId",
   authenticateUser.validateAuthIdToken,
   subscriptionValidate.validateBodySchema(

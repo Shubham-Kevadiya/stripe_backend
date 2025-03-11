@@ -42,17 +42,7 @@ const createPaymentIntent = async (paymentData) => {
       paymentMethod: paymentData.paymentMethod.id,
       description: (paymentData.description = "IT Service Intent"),
     });
-    const payment = await paymentUtils.savePayment(
-      new PaymentModel({
-        userId: user._id,
-        stripePaymentId: paymentIntent.id,
-        paymentType: common.PAYMENT_TYPE.INTENT,
-        amount: paymentData.amount,
-        paymentMethod: paymentData.paymentMethod,
-        clientSecret: paymentIntent.client_secret,
-        planId: plan._id,
-      })
-    );
+
     const purchase = await purchaseUtils.savePurchase({
       userId: user._id,
       planType: common.PLAN_TYPE.ONE_TIME,

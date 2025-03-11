@@ -16,6 +16,10 @@ const paymentSchema = new mongoose.Schema(
       type: String,
       require: true,
     }, // id of intent or subscription
+    paymentIntentId: {
+      type: String,
+      require: true,
+    }, // id of intent or subscription
     paymentType: {
       type: String,
       enum: ["intent", "subscription"],
@@ -25,11 +29,23 @@ const paymentSchema = new mongoose.Schema(
       type: Number,
       require: true,
     },
+    startDate: {
+      type: String,
+      default: "N/A",
+    },
+    endDate: {
+      type: String,
+      default: "N/A",
+    },
+    nextPaymentDate: {
+      type: String,
+      default: "N/A",
+    },
     stripeChargeId: {
       type: String,
       default: "",
     },
-    paymentLink: {
+    invoiceURL: {
       type: String,
       default: "",
     },
@@ -45,6 +61,10 @@ const paymentSchema = new mongoose.Schema(
       type: String,
       enum: ["Processing", "Completed", "Failed"],
       default: "Processing",
+    },
+    failReason: {
+      type: String,
+      default: "",
     },
     reason: {
       type: String,
