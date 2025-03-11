@@ -2,7 +2,9 @@ import Stripe from "stripe";
 import config from "../config/config.js";
 import common from "../constants/common.js";
 
-const stripe = Stripe(config.stipe.secret_key);
+const stripe = Stripe(config.stipe.secret_key, {
+  maxNetworkRetries: 2,
+});
 
 const createCustomerInStripe = async (customerData) => {
   const customer = await stripe.customers.create({
@@ -222,6 +224,26 @@ const updateSubscriptionInStripe = async (subscriptionId, metadata) => {
   return subscription;
 };
 
+const resetSubscriptionTimeInStripe = async (subscriptionId) => {
+  const subscription = await stripe.subscriptions.update(subscriptionId, {
+    billing_cycle_anchor: "now",
+    proration_behavior: "create_prorations",
+  });
+  return subscription;
+};
+
+const setAutoCollectionOfInvoiceInStripe = async (invoiceId) => {
+  const invoice = await stripe.invoices.update(invoiceId, {
+    auto_advance: true,
+  });
+  return invoice;
+};
+
+const payInvoiceInStripe = async (invoiceId) => {
+  const invoice = await stripe.invoices.pay(invoiceId);
+  return invoice;
+};
+
 const updatePaymentMethodOfSubscriptionInStripe = async (
   subscriptionId,
   paymentMethodId
@@ -305,6 +327,9 @@ export default {
   pauseSubscriptionInStripe,
   resumeSubscriptionInStripe,
   updateSubscriptionInStripe,
+  resetSubscriptionTimeInStripe,
+  setAutoCollectionOfInvoiceInStripe,
+  payInvoiceInStripe,
   updatePaymentMethodOfSubscriptionInStripe,
   cancelSubscriptionInStripe,
   getSubscriptionBySubscriptionIdInStripe,

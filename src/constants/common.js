@@ -21,7 +21,8 @@ export default {
   },
   SUBSCRIPTION: { COLLECTION_METHOD: "charge_automatically" },
   PAUSE_COLLECTION_TYPE: {
-    MARK_UNCOLLECTIBLE: "mark_uncollectible",
+    MARK_UNCOLLECTIBLE: "keep_as_draft",
+    // MARK_UNCOLLECTIBLE: "mark_uncollectible",
     NULL: "null",
   },
   STRIPE_ERROR_CODES: { card_declined: { error: "INSUFFICIENT_BALANCE" } },

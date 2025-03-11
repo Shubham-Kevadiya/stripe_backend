@@ -33,27 +33,30 @@ const createSubscription = async (subscriptionData) => {
       subscriptionData.priceId,
       new Date(new Date().setFullYear(new Date().getFullYear() + 1))
     );
-    const payment = await paymentUtils.savePayment({
-      userId: user._id,
-      stripePaymentId: subscription.id,
-      paymentType: common.PAYMENT_TYPE.SUBSCRIPTION,
-      amount: subscriptionData.amount,
-      paymentMethod: { id: subscriptionData.paymentMethodId, type: "card" },
-      planId: subscriptionData.planId,
-    });
+    // const payment = await paymentUtils.savePayment({
+    //   userId: user._id,
+    //   stripePaymentId: subscription.id,
+    //   paymentType: common.PAYMENT_TYPE.SUBSCRIPTION,
+    //   amount: subscriptionData.amount,
+    //   paymentMethod: { id: subscriptionData.paymentMethodId, type: "card" },
+    //   planId: subscriptionData.planId,
+    // });
     const purchase = await purchaseUtils.savePurchase({
       userId: user._id,
       planType: subscriptionData.planType,
       amount: subscriptionData.amount,
       interval: subscriptionData.interval,
       planId: subscriptionData.planId,
-      paymentId: payment._id,
+      // paymentId: payment._id,
     });
     await stripeHelper.updateSubscriptionInStripe(subscription.id, {
       purchaseId: purchase._id.toString(),
       planType: subscriptionData.planType,
       amount: subscriptionData.amount,
       interval: subscriptionData.interval,
+      userId: user._id.toString(),
+      paymentType: common.PAYMENT_TYPE.SUBSCRIPTION,
+      planId: subscriptionData.planId,
     });
     return subscription;
   } catch (error) {
@@ -75,7 +78,7 @@ const updateSubscription = async (subscriptionData) => {
       subscriptionData.paymentMethodId
     );
 
-    return subscription;
+    return "subscription updated successfully";
   } catch (error) {
     console.log("Error from update subscription service", { error });
     throw new Error(error.message);
@@ -96,15 +99,25 @@ const pauseSubscription = async (subscriptionData) => {
       console.log("purchase not found in pause subscription");
       throw new Error("RESOURCE_NOT_FOUND");
     }
-    if (existingPurchase.isPaused) {
-      console.log("You have already paused the plan");
-      throw new Error("CONFLICT");
-    }
+    // if (existingPurchase.isPaused) {
+    //   console.log("You have already paused the plan");
+    //   throw new Error("CONFLICT");
+    // }
     if (existingPurchase.planType == "One Time") {
       console.log("You have purchase One Time plan", { subscriptionData });
       throw new Error("BAD_CREDENTIALS");
     }
-    const subscription = await stripeHelper.pauseSubscriptionInStripe(
+
+    const subscription =
+      await stripeHelper.getSubscriptionBySubscriptionIdInStripe(
+        subscriptionData.subscriptionId
+      );
+
+    const resetSubscription = await stripeHelper.resetSubscriptionTimeInStripe(
+      subscription.id
+    );
+
+    await stripeHelper.pauseSubscriptionInStripe(
       subscriptionData.stripeSubscriptionId
     );
     await purchaseUtils.updatePurchaseById({
@@ -140,9 +153,41 @@ const resumeSubscription = async (subscriptionData) => {
       throw new Error("BAD_CREDENTIALS");
     }
 
-    const subscription = await stripeHelper.resumeSubscriptionInStripe(
+    const subscription =
+      await stripeHelper.getSubscriptionBySubscriptionIdInStripe(
+        subscriptionData.subscriptionId
+      );
+
+    // const latestInvoice = await stripeHelper.getInvoiceByIdFromStripe(
+    //   subscription.latest_invoice
+    // );
+
+    // let invoiceToPay;
+    // if (latestInvoice.status == "draft") {
+    //   invoiceToPay = await stripeHelper.payInvoiceInStripe(latestInvoice.id);
+    // }
+
+    // await stripeHelper.setAutoCollectionOfInvoiceInStripe(
+    //   subscription.latest_invoice
+    // );
+
+    await stripeHelper.resumeSubscriptionInStripe(
       subscriptionData.subscriptionId
     );
+
+    const resetSubscription = await stripeHelper.resetSubscriptionTimeInStripe(
+      subscription.id
+    );
+    console.log({ resetSubscription });
+
+    const latestInvoice = await stripeHelper.getInvoiceByIdFromStripe(
+      resetSubscription.latest_invoice
+    );
+
+    const invoiceToPay = await stripeHelper.payInvoiceInStripe(
+      latestInvoice.id
+    );
+
     const resumeTime = new Date();
 
     await purchaseUtils.updatePurchaseById({
@@ -160,7 +205,7 @@ const resumeSubscription = async (subscriptionData) => {
       isResumed: true,
     });
 
-    return subscription;
+    return invoiceToPay ? invoiceToPay.hosted_invoice_url : "";
   } catch (error) {
     console.log("Error from resume subscription service", { error });
     throw new Error(error.message);
