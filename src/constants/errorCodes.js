@@ -70,6 +70,13 @@ export default {
       message: "Product Name Already Exist",
     },
   },
+  PROMOCODE_NAME_ALREADY_EXIST: {
+    httpStatusCode: 401,
+    body: {
+      code: "promocode_name_already_exist",
+      message: "Promocode Name Already Exist",
+    },
+  },
   INVALID_PASSWORD: {
     httpStatusCode: 401,
     body: {

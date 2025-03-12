@@ -2,6 +2,7 @@ import common from "../constants/common.js";
 import paymentUtils from "../utils/payment.utils.js";
 import purchaseUtils from "../utils/purchase.utils.js";
 import userUtils from "../utils/user.utils.js";
+import promocodeUtils from "../utils/promocode.utils.js";
 import stripeHelper from "./stripe.helper.js";
 
 const paymentIntentSuccessHelper = async (paymentIntentId) => {
@@ -26,24 +27,6 @@ const paymentIntentSuccessHelper = async (paymentIntentId) => {
         customer: paymentIntentObj.customer,
       });
     }
-    // const payment = await paymentUtils.getPaymentusingWebhookData({
-    //   userId: user._id.toString(),
-    //   stripePaymentId: paymentIntentObj.id,
-    //   amount: paymentIntentObj.amount / 100,
-    //   clientSecret: paymentIntentObj.client_secret
-    //     ? paymentIntentObj.client_secret
-    //     : "",
-    // });
-    // if (!payment) {
-    //   console.log(`payment not found,log from payment_intent.succeeded`, {
-    //     userId: user._id,
-    //     stripePaymentId: paymentIntentObj.id,
-    //     amount: paymentIntentObj.amount / 100,
-    //     clientSecret: paymentIntentObj.client_secret
-    //       ? paymentIntentObj.client_secret
-    //       : "",
-    //   });
-    // }
 
     const purchase = await purchaseUtils.getPurchaseById(
       paymentIntentObj.metadata.purchaseId
@@ -55,24 +38,32 @@ const paymentIntentSuccessHelper = async (paymentIntentId) => {
       });
     }
 
-    const payment = await paymentUtils.savePayment(
-      new PaymentModel({
-        userId: user._id,
-        stripePaymentId: paymentIntentObj.id,
-        paymentType: common.PAYMENT_TYPE.INTENT,
-        amount: paymentIntentObj.amount,
-        paymentMethod: paymentIntentObj.paymentMethod,
-        clientSecret: paymentIntentObj.client_secret,
-        planId: purchase.planId,
-        stripeChargeId: paymentIntentObj.latest_charge,
-        startDate: new Date().toISOString(),
-        endDate: new Date(
-          new Date().setFullYear(new Date().getFullYear() + 1)
-        ).toISOString(),
-        nextPaymentDate: "N/A",
-        status: "Completed",
-      })
+    const promocode = await promocodeUtils.getPromocodeById(
+      paymentIntentObj.metadata.promocodeId
     );
+
+    await promocodeUtils.updatePromocodeById(promocode._id, {
+      ...promocode,
+      usedCount: promocode.usedCount + 1,
+    });
+
+    const payment = await paymentUtils.savePayment({
+      userId: user._id,
+      stripePaymentId: paymentIntentObj.id,
+      paymentType: common.PAYMENT_TYPE.INTENT,
+      amount: paymentIntentObj.amount,
+      paymentMethod: { id: paymentIntentObj.payment_method },
+      clientSecret: paymentIntentObj.client_secret,
+      planId: purchase.planId,
+      stripeChargeId: paymentIntentObj.latest_charge,
+      startDate: new Date().toISOString(),
+      endDate: new Date(
+        new Date().setFullYear(new Date().getFullYear() + 1)
+      ).toISOString(),
+      nextPaymentDate: "N/A",
+      status: "Completed",
+      promocodeId: promocode._id,
+    });
 
     purchase.transactionHistory.push(payment._id);
     await purchaseUtils.updatePurchaseById({
@@ -86,6 +77,11 @@ const paymentIntentSuccessHelper = async (paymentIntentId) => {
       paymentConfirmed: true,
       paymentMethod: payment.paymentMethod,
     });
+
+    if (paymentIntentObj.metadata.paymentId != "") {
+      user.usedPromocodes.push(promocode._id);
+      await userUtils.updateUserById({ ...user, userId: user._id });
+    }
   } catch (error) {
     console.log("Error log from payment_intent.succeeded", { error });
   }
@@ -195,6 +191,15 @@ const paymentIntentSuceessHelperForSubscription = async (intentObj) => {
       });
     }
 
+    const promocode = await promocodeUtils.getPromocodeById(
+      subscription.metadata.promocodeId
+    );
+
+    await promocodeUtils.updatePromocodeById(promocode._id, {
+      ...promocode,
+      usedCount: promocode.usedCount + 1,
+    });
+
     let startDate = new Date(invoice.created * 1000);
     let endDate = new Date(
       new Date().setFullYear(new Date().getFullYear() + 1)
@@ -245,6 +250,7 @@ const paymentIntentSuceessHelperForSubscription = async (intentObj) => {
       endDate: nextPaymentDate.toISOString(),
       nextPaymentDate: nextPaymentDate.toISOString(),
       invoiceURL: invoice.hosted_invoice_url,
+      promocodeId: subscription.metadata.promocodeId,
     });
 
     purchase.transactionHistory.push(payment._id);
@@ -440,6 +446,7 @@ const paymentIntentFailHelperForSubscription = async (intentObj) => {
       endDate: "N/A",
       nextPaymentDate: "N/A",
       invoiceURL: "N/A",
+      promocodeId: subscription.metedata.promocodeId,
     });
 
     purchase.transactionHistory.push(payment._id);

@@ -82,6 +82,20 @@ const userSchema = new mongoose.Schema(
         default: "",
       },
     },
+    availablePromocodes: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "promocode",
+        required: true,
+      },
+    ],
+    usedPromocodes: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "promocode",
+        required: true,
+      },
+    ],
     userType: {
       type: String,
       default: "USER",

@@ -1,8 +1,9 @@
 import stripeHelper from "../../helper/stripe.helper.js";
 import userUtils from "../../utils/user.utils.js";
 import purchaseUtils from "../../utils/purchase.utils.js";
-import paymentUtils from "../../utils/payment.utils.js";
+import promocodeUtils from "../../utils/promocode.utils.js";
 import common from "../../constants/common.js";
+import paymentUtils from "../../utils/payment.utils.js";
 
 const createSubscription = async (subscriptionData) => {
   try {
@@ -11,6 +12,7 @@ const createSubscription = async (subscriptionData) => {
       console.log("user not found in pause subscription");
       throw new Error("USER_NOT_FOUND");
     }
+
     const paymentMethods = user.paymentMethod.map((a) => {
       return a.id;
     });
@@ -18,37 +20,101 @@ const createSubscription = async (subscriptionData) => {
       console.log("user has no payment method with this id");
       throw new Error("PAYMENT_METHOD_NOT_FOUND");
     }
-    // let cancelAt;
-    // if (subscriptionData.interval == "week") {
-    //   cancelAt = new Date(new Date().setDate(new Date().getDate() + 7));
-    // } else if (subscriptionData.interval == "month") {
-    //   cancelAt = new Date(new Date().setMonth(new Date().getMonth() + 1));
-    // } else if (subscriptionData.interval == "year") {
-    //   cancelAt = new Date(new Date().setFullYear(new Date().getFullYear() + 1));
-    // }
+
+    const promocode = await promocodeUtils.getPromocodeById(
+      subscriptionData.promocodeId
+    );
+
+    if (!promocode) {
+      console.log("Promocode not found in create subscription", {
+        promocodeId: subscriptionData.stripePromocodeId,
+      });
+      throw new Error("NOT_FOUND");
+    }
+
+    if (!promocode.isActive || promocode.isDeleted) {
+      console.log("currently promocode is not available");
+      throw new Error("CONFLICT");
+    }
+
+    if (promocode.promocodeFor != "subscription") {
+      console.log(`Invalid promocode for ${promocode.promocodeFor}`, {
+        promocodeId: promocode._id,
+      });
+      throw new Error("CONFLICT");
+    }
 
     const subscription = await stripeHelper.createSubscriptionInStripe(
       subscriptionData.paymentMethodId,
       user.customerId,
       subscriptionData.priceId,
-      new Date(new Date().setFullYear(new Date().getFullYear() + 1))
+      new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
+      promocode.stripePromocodeId
     );
-    // const payment = await paymentUtils.savePayment({
-    //   userId: user._id,
-    //   stripePaymentId: subscription.id,
-    //   paymentType: common.PAYMENT_TYPE.SUBSCRIPTION,
-    //   amount: subscriptionData.amount,
-    //   paymentMethod: { id: subscriptionData.paymentMethodId, type: "card" },
-    //   planId: subscriptionData.planId,
-    // });
+
+    let startDate = new Date();
+    let endDate = new Date(
+      new Date().setFullYear(new Date().getFullYear() + 1)
+    );
+
+    let payment;
+    if (
+      promocode.discountInAmount == subscriptionData.amount ||
+      promocode.discountInPercentage == 100
+    ) {
+      let nextPaymentDate;
+      switch (subscriptionData.interval) {
+        case "week":
+          nextPaymentDate = new Date(
+            new Date(new Date()).setDate(new Date(new Date()).getDate() + 7)
+          );
+          break;
+        case "month":
+          nextPaymentDate = new Date(
+            new Date(new Date()).setMonth(new Date(new Date()).getMonth() + 1)
+          );
+          break;
+        case "year":
+          nextPaymentDate = new Date(
+            new Date(new Date()).setFullYear(
+              new Date(new Date()).getFullYear() + 1
+            )
+          );
+          break;
+      }
+      const paymentMethod = {
+        id: subscriptionData.paymentMethodId,
+        type: "card",
+      };
+      payment = await paymentUtils.savePayment({
+        userId: user._id,
+        stripePaymentId: subscription.id,
+        paymentType: common.PAYMENT_TYPE.SUBSCRIPTION,
+        amount: subscriptionData.amount,
+        paymentMethod,
+        planId: subscriptionData.planId,
+        startDate: startDate.toISOString(),
+        endDate: nextPaymentDate.toISOString(),
+        nextPaymentDate: nextPaymentDate.toISOString(),
+        status: "Completed",
+        promocodeId: promocode._id,
+      });
+    }
+
+    user.usedPromocodes.push(promocode._id);
+    await userUtils.updateUserById({ ...user, userId: user._id });
+
     const purchase = await purchaseUtils.savePurchase({
       userId: user._id,
       planType: subscriptionData.planType,
       amount: subscriptionData.amount,
       interval: subscriptionData.interval,
       planId: subscriptionData.planId,
-      // paymentId: payment._id,
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+      transactionHistory: payment ? payment : [],
     });
+
     await stripeHelper.updateSubscriptionInStripe(subscription.id, {
       purchaseId: purchase._id.toString(),
       planType: subscriptionData.planType,
@@ -57,6 +123,7 @@ const createSubscription = async (subscriptionData) => {
       userId: user._id.toString(),
       paymentType: common.PAYMENT_TYPE.SUBSCRIPTION,
       planId: subscriptionData.planId,
+      promocodeId: promocode._id.toString(),
     });
     return subscription;
   } catch (error) {
@@ -178,7 +245,6 @@ const resumeSubscription = async (subscriptionData) => {
     const resetSubscription = await stripeHelper.resetSubscriptionTimeInStripe(
       subscription.id
     );
-    console.log({ resetSubscription });
 
     const latestInvoice = await stripeHelper.getInvoiceByIdFromStripe(
       resetSubscription.latest_invoice

@@ -6,6 +6,8 @@ const stripe = Stripe(config.stipe.secret_key, {
   maxNetworkRetries: 2,
 });
 
+// customer
+
 const createCustomerInStripe = async (customerData) => {
   const customer = await stripe.customers.create({
     name: customerData.name,
@@ -31,6 +33,8 @@ const setDefaultPaymenteMethodToCustomerInStripe = async (
   return customer;
 };
 
+// product
+
 const createProductInStripe = async (productName) => {
   const product = await stripe.products.create({
     name: productName,
@@ -44,6 +48,13 @@ const updateProductNameInStripe = async (productId, productName) => {
   });
   return product;
 };
+
+const deleteProductInStripe = async (productId) => {
+  await stripe.products.del(productId);
+  return "Product deleted successfully";
+};
+
+//price
 
 const createPriceInStripe = async (productData) => {
   const price = await stripe.prices.create(productData);
@@ -64,17 +75,14 @@ const deletePriceInStripe = async (priceId, status) => {
   return "Price updated successfully";
 };
 
-const deleteProductInStripe = async (productId) => {
-  await stripe.products.del(productId);
-  return "Product deleted successfully";
-};
+// const createTokenForPaymenthodInStripe = async (cardData) => {
+//   const token = await stripe.tokens.create({
+//     card: cardData,
+//   });
+//   return token;
+// };
 
-const createTokenForPaymenthodInStripe = async (cardData) => {
-  const token = await stripe.tokens.create({
-    card: cardData,
-  });
-  return token;
-};
+// payment method
 
 const createPaymentMethodInStripe = async (billingDetails, token) => {
   const paymentMethod = await stripe.paymentMethods.create({
@@ -140,6 +148,8 @@ const detachPaymentMethodInStripe = async (paymentMethodId) => {
   return paymentMethod;
 };
 
+// payment intent
+
 const createPaymentIntentInStripe = async ({
   amount,
   currency,
@@ -189,11 +199,14 @@ const cancelPaymentIntentInStripe = async (paymentIntentId) => {
   return paymentIntent;
 };
 
+// subscription
+
 const createSubscriptionInStripe = async (
   paymentMethodId,
   customerId,
   price,
-  cancelAt
+  cancelAt,
+  stripePromocodeId
 ) => {
   const subscription = await stripe.subscriptions.create({
     customer: customerId,
@@ -202,6 +215,7 @@ const createSubscriptionInStripe = async (
     collection_method: common.SUBSCRIPTION.COLLECTION_METHOD,
     cancel_at: cancelAt,
     expand: ["latest_invoice"],
+    promotion_code: stripePromocodeId,
   });
   return subscription;
 };
@@ -224,19 +238,19 @@ const updateSubscriptionInStripe = async (subscriptionId, metadata) => {
   return subscription;
 };
 
+const removePromocodeFromSubscriptionInStripe = async (subscriptionId) => {
+  const subscription = await stripe.subscriptions.update(subscriptionId, {
+    promotion_code: "",
+  });
+  return subscription;
+};
+
 const resetSubscriptionTimeInStripe = async (subscriptionId) => {
   const subscription = await stripe.subscriptions.update(subscriptionId, {
     billing_cycle_anchor: "now",
     proration_behavior: "create_prorations",
   });
   return subscription;
-};
-
-const setAutoCollectionOfInvoiceInStripe = async (invoiceId) => {
-  const invoice = await stripe.invoices.update(invoiceId, {
-    auto_advance: true,
-  });
-  return invoice;
 };
 
 const payInvoiceInStripe = async (invoiceId) => {
@@ -278,6 +292,15 @@ const cancelSubscriptionInStripe = async (subscriptionId, reason) => {
   return subscription;
 };
 
+// invoice
+
+const setAutoCollectionOfInvoiceInStripe = async (invoiceId) => {
+  const invoice = await stripe.invoices.update(invoiceId, {
+    auto_advance: true,
+  });
+  return invoice;
+};
+
 const getInvoiceByIdFromStripe = async (invoiceId) => {
   const invoice = await stripe.invoices.retrieve(invoiceId);
   return invoice;
@@ -296,10 +319,91 @@ const constructWebhookInStripe = async ({
   return event;
 };
 
-// const getUpcomingInvoiceOfCustomer = async (subscription) => {
-//   const invoice = await stripe.invoices.retrieveUpcoming({ subscription });
-//   return invoice;
-// };
+// coupen
+
+const createCoupenInStripe = async (
+  stripeCoupenName,
+  currency,
+  duration,
+  durationInMonths,
+  discountInAmount,
+  discountInPercentage,
+  plan,
+  maxRedumption
+) => {
+  let obj = {
+    name: stripeCoupenName,
+    currency,
+    duration,
+    duration_in_months: durationInMonths != 0 ? durationInMonths : null,
+    // amount_off:
+    //   discountInAmount && discountInAmount != 0 ? discountInAmount : 0,
+    // percent_off:
+    //   discountInPercentage && discountInPercentage != 0
+    //     ? discountInPercentage
+    //     : null,
+    max_redemptions: maxRedumption,
+  };
+  if (plan.length > 0) {
+    obj.applies_to = {
+      products: plan,
+    };
+  }
+  if (discountInPercentage) {
+    obj.percent_off = discountInPercentage;
+  } else {
+    obj.amount_off = discountInAmount;
+  }
+  const coupen = await stripe.coupons.create(obj);
+  return coupen;
+};
+
+const updateCoupenInStripe = async (coupenId, coupenName) => {
+  const coupen = await stripe.coupons.update(coupenId, {
+    name: coupenName,
+  });
+  return coupen;
+};
+
+const deleteCoupenInStripe = async (coupenId) => {
+  await stripe.coupons.del(coupenId);
+  return "coupen deleted successfully";
+};
+
+// promocode
+
+const createPromocodeInStripe = async (
+  coupenId,
+  promocode,
+  specificCustomer,
+  maxRedumption,
+  minAmount,
+  currency
+) => {
+  const createdPromocode = await stripe.promotionCodes.create({
+    coupon: coupenId,
+    code: promocode,
+    customer: specificCustomer != "" ? specificCustomer : null,
+    max_redemptions: maxRedumption,
+    restrictions: {
+      minimum_amount: minAmount,
+      minimum_amount_currency: currency,
+    },
+  });
+  return createdPromocode;
+};
+
+const getpromocodeFromStripe = async (promocodeId) => {
+  const promocode = await stripe.promotionCodes.retrieve(promocodeId);
+  return promocode;
+};
+
+const updatepromocodeInStripe = async (promocodeId, isActive) => {
+  const promocode = await stripe.promotionCodes.update(promocodeId, {
+    active: isActive,
+  });
+  return promocode;
+};
 
 export default {
   createCustomerInStripe,
@@ -311,7 +415,6 @@ export default {
   updatePriceInStripe,
   deletePriceInStripe,
   deleteProductInStripe,
-  createTokenForPaymenthodInStripe,
   createPaymentMethodInStripe,
   attachCustomerToPaymentMethodInStripe,
   updatePaymentMethodInStripe,
@@ -327,6 +430,7 @@ export default {
   pauseSubscriptionInStripe,
   resumeSubscriptionInStripe,
   updateSubscriptionInStripe,
+  removePromocodeFromSubscriptionInStripe,
   resetSubscriptionTimeInStripe,
   setAutoCollectionOfInvoiceInStripe,
   payInvoiceInStripe,
@@ -335,5 +439,10 @@ export default {
   getSubscriptionBySubscriptionIdInStripe,
   getInvoiceByIdFromStripe,
   constructWebhookInStripe,
-  // getUpcomingInvoiceOfCustomer,
+  createCoupenInStripe,
+  updateCoupenInStripe,
+  deleteCoupenInStripe,
+  createPromocodeInStripe,
+  getpromocodeFromStripe,
+  updatepromocodeInStripe,
 };

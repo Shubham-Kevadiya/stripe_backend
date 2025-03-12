@@ -12,6 +12,11 @@ const getAllPayment = async (page, limit) => {
   return payments;
 };
 
+const getAllCistinctPaymentUsingStripePaymentId = async () => {
+  const payments = await PaymentModel.distinct("stripePaymentId");
+  return payments;
+};
+
 const getPaymentById = async (paymentId) => {
   const payment = await PaymentModel.findById(paymentId);
   return payment;
@@ -50,6 +55,7 @@ const deletePaymentById = async (paymentId) => {
 export default {
   savePayment,
   getAllPayment,
+  getAllCistinctPaymentUsingStripePaymentId,
   getPaymentById,
   getPaymentusingWebhookData,
   updatePaymentById,
