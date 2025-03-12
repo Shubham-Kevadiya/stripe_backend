@@ -12,6 +12,11 @@ const paymentSchema = new mongoose.Schema(
       ref: "product",
       required: true,
     },
+    promocodeId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "promocode",
+      required: true,
+    },
     stripePaymentId: {
       type: String,
       require: true,
@@ -51,7 +56,7 @@ const paymentSchema = new mongoose.Schema(
     },
     paymentMethod: {
       id: { type: String, required: true },
-      type: { type: String, required: true },
+      type: { type: String, default: "card" },
     },
     clientSecret: {
       type: String,

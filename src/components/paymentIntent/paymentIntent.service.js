@@ -1,10 +1,11 @@
 import stripeHelper from "../../helper/stripe.helper.js";
 import userUtils from "../../utils/user.utils.js";
-import paymentUtils from "../../utils/payment.utils.js";
-import { PaymentModel } from "../../model/payment.model.js";
 import common from "../../constants/common.js";
 import purchaseUtils from "../../utils/purchase.utils.js";
 import productUtils from "../../utils/product.utils.js";
+import promocodeHelper from "../../helper/promocode.helper.js";
+import promocodeUtils from "../../utils/promocode.utils.js";
+import paymentUtils from "../../utils/payment.utils.js";
 
 const createPaymentIntent = async (paymentData) => {
   try {
@@ -35,13 +36,65 @@ const createPaymentIntent = async (paymentData) => {
       );
       throw new Error("PAYMENT_METHOD_NOT_FOUND");
     }
+    const promocode = await promocodeUtils.getPromocodeById(
+      paymentData.promocodeId
+    );
+
+    if (!promocode) {
+      console.log("Promocode not found in create subscription", {
+        promocodeId: paymentData.stripePromocodeId,
+      });
+      throw new Error("NOT_FOUND");
+    }
+    if (promocode.promocodeFor != "one-time") {
+      console.log(`Invalid promocode for ${promocodeFor}`, {
+        promocodeId: promocode._id,
+      });
+      throw new Error("CONFLICT");
+    }
+
+    let amount;
+    if (promocode.discountInAmount) {
+      amount = paymentData.amount - promocode.discountInAmount;
+    } else if (promocode.discountInPercentage) {
+      amount =
+        paymentData.amount -
+        Math.round((paymentData.amount * promocode.discountInPercentage) / 100);
+    }
+
+    await promocodeHelper.isPromocodeAvailableToUse(promocode, paymentData);
+
     const paymentIntent = await stripeHelper.createPaymentIntentInStripe({
-      amount: paymentData.amount * 100,
+      amount: (amount == 0 ? amount + 0.5 : amount) * 100,
       currency: plan.currency,
       customerId: user.customerId,
       paymentMethod: paymentData.paymentMethod.id,
       description: (paymentData.description = "IT Service Intent"),
     });
+
+    let payment;
+    if (
+      promocode.discountInAmount == paymentData.amount ||
+      promocode.discountInPercentage == 100
+    ) {
+      payment = await paymentUtils.savePayment({
+        userId: user._id,
+        stripePaymentId: paymentIntent.id,
+        paymentType: common.PAYMENT_TYPE.INTENT,
+        amount: amount,
+        paymentMethod: paymentData.paymentMethod,
+        planId: paymentData.planId,
+        startDate: new Date().toISOString(),
+        endDate: new Date(
+          new Date().setFullYear(new Date().getFullYear() + 1)
+        ).toISOString(),
+        status: "Completed",
+        promocodeId: promocode._id,
+      });
+
+      user.usedPromocodes.push(promocode._id);
+      await userUtils.updateUserById({ ...user, userId: user._id });
+    }
 
     const purchase = await purchaseUtils.savePurchase({
       userId: user._id,
@@ -49,11 +102,15 @@ const createPaymentIntent = async (paymentData) => {
       amount: paymentData.amount,
       interval: common.INTERVAL.YEAR,
       planId: plan._id,
+      transactionHistory: payment ? payment : [],
     });
+
     await stripeHelper.updatePaymentIntentInStripe(paymentIntent.id, {
       purchaseId: purchase._id.toString(),
+      promocodeId: paymentData.promocodeId.toString(),
+      paymentId: payment ? payment._id : "",
     });
-    return payment;
+    return paymentIntent;
   } catch (error) {
     console.log("Error from create payment intent", {
       code: error.statusCode,

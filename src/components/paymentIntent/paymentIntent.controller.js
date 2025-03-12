@@ -9,8 +9,8 @@ const createPaymentIntent = async (req, res, next) => {
       userId,
     });
     return res.status(200).json({
-      id: paymentIntent.stripePaymentId,
-      clientSecret: paymentIntent.clientSecret,
+      id: paymentIntent.id,
+      clientSecret: paymentIntent.client_secret,
     });
   } catch (error) {
     console.log("error", "error in create paymentIntent", error);

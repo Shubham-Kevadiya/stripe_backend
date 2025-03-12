@@ -6,6 +6,7 @@ import paymentIntentRoute from "./components/paymentIntent/paymentIntent.route.j
 import webhookRoute from "./components/webhook/webhook.route.js";
 import purchaseRoute from "./components/purchase/purchase.route.js";
 import subscriptionRoute from "./components/subscription/subscription.route.js";
+import promocodeRoute from "./components/promocode/promocode.route.js";
 
 const apiRoute = express.Router();
 
@@ -15,6 +16,7 @@ apiRoute.use("/paymentMethods", paymentMethodRoute);
 apiRoute.use("/one-time", paymentIntentRoute);
 apiRoute.use("/subscriptions", subscriptionRoute);
 apiRoute.use("/purchases", purchaseRoute);
+apiRoute.use("/promocodes", promocodeRoute);
 apiRoute.use("/webhook", webhookRoute);
 
 export default apiRoute;

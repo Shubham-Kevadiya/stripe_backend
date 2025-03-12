@@ -13,6 +13,7 @@ const createSubscriptionSchema = Joi.object({
   interval: Joi.string().valid("week", "month", "year").required(),
   planType: Joi.string().required(),
   amount: Joi.number().required(),
+  promocodeId: Joi.string().optional(),
 });
 
 const updateSubscriptionSchema = Joi.object({
