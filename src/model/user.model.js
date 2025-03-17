@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema(
   {
@@ -41,67 +41,67 @@ const userSchema = new mongoose.Schema(
     defaultPaymentMethod: {
       id: {
         type: String,
-        default: "",
+        default: '',
       },
       type: {
         type: String,
-        default: "",
+        default: '',
       },
     },
     address: {
       name: {
         type: String,
-        default: "",
+        default: '',
       },
       email: {
         type: String,
-        default: "",
+        default: '',
       },
       city: {
         type: String,
-        default: "",
+        default: '',
       },
       country: {
         type: String,
-        default: "",
+        default: '',
       },
       line1: {
         type: String,
-        default: "",
+        default: '',
       },
       line2: {
         type: String,
-        default: "",
+        default: '',
       },
       postal_code: {
         type: String,
-        default: "",
+        default: '',
       },
       state: {
         type: String,
-        default: "",
+        default: '',
       },
     },
     availablePromocodes: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "promocode",
+        ref: 'promocode',
         required: true,
       },
     ],
     usedPromocodes: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "promocode",
+        ref: 'promocode',
         required: true,
       },
     ],
     userType: {
       type: String,
-      default: "USER",
+      default: 'USER',
     },
   },
   { timestamps: true, versionKey: false }
 );
 
-export const UserModel = new mongoose.model("user", userSchema);
+export const UserModel = new mongoose.model('user', userSchema);

@@ -1,56 +1,56 @@
-import stripeHelper from "../../helper/stripe.helper.js";
-import userUtils from "../../utils/user.utils.js";
-import common from "../../constants/common.js";
-import purchaseUtils from "../../utils/purchase.utils.js";
-import productUtils from "../../utils/product.utils.js";
-import promocodeHelper from "../../helper/promocode.helper.js";
-import promocodeUtils from "../../utils/promocode.utils.js";
-import paymentUtils from "../../utils/payment.utils.js";
+import common from '../../constants/common.js';
+import promocodeHelper from '../../helper/promocode.helper.js';
+import stripeHelper from '../../helper/stripe.helper.js';
+import paymentUtils from '../../utils/payment.utils.js';
+import productUtils from '../../utils/product.utils.js';
+import promocodeUtils from '../../utils/promocode.utils.js';
+import purchaseUtils from '../../utils/purchase.utils.js';
+import userUtils from '../../utils/user.utils.js';
 
 const createPaymentIntent = async (paymentData) => {
   try {
     const user = await userUtils.getUserById(paymentData.userId);
     if (!user) {
-      console.log("user not found in create payment intent");
-      throw new Error("USER_NOT_FOUND");
+      console.log('user not found in create payment intent');
+      throw new Error('USER_NOT_FOUND');
     }
-    const paymentMethods = user.paymentMethod.map((a) => {
-      return a.id;
+    const paymentMethods = user.paymentMethod.map((paymentMethod) => {
+      return paymentMethod.id;
     });
 
     if (!paymentMethods.includes(paymentData.paymentMethod.id)) {
-      console.log("user has no payment method with this id");
-      throw new Error("CARD_NOT_OWNED_BY_USER");
+      console.log('user has no payment method with this id');
+      throw new Error('CARD_NOT_OWNED_BY_USER');
     }
     const plan = await productUtils.getProductById(paymentData.planId);
     if (!plan) {
-      console.log("plan not found in create payment intent");
-      throw new Error("RESOURCE_NOT_FOUND");
+      console.log('plan not found in create payment intent');
+      throw new Error('RESOURCE_NOT_FOUND');
     }
     const paymentMethod = await stripeHelper.getPaymentMethodInStripe(
       paymentData.paymentMethod.id
     );
     if (!paymentMethod) {
       console.log(
-        "payment method not found in stripe in create payment intent"
+        'payment method not found in stripe in create payment intent'
       );
-      throw new Error("PAYMENT_METHOD_NOT_FOUND");
+      throw new Error('PAYMENT_METHOD_NOT_FOUND');
     }
     const promocode = await promocodeUtils.getPromocodeById(
       paymentData.promocodeId
     );
 
     if (!promocode) {
-      console.log("Promocode not found in create subscription", {
+      console.log('Promocode not found in create subscription', {
         promocodeId: paymentData.stripePromocodeId,
       });
-      throw new Error("NOT_FOUND");
+      throw new Error('NOT_FOUND');
     }
-    if (promocode.promocodeFor != "one-time") {
-      console.log(`Invalid promocode for ${promocodeFor}`, {
+    if (promocode.promocodeFor != 'one-time') {
+      console.log(`Invalid promocode for ${promocode.promocodeFor}`, {
         promocodeId: promocode._id,
       });
-      throw new Error("CONFLICT");
+      throw new Error('CONFLICT');
     }
 
     let amount;
@@ -69,7 +69,7 @@ const createPaymentIntent = async (paymentData) => {
       currency: plan.currency,
       customerId: user.customerId,
       paymentMethod: paymentData.paymentMethod.id,
-      description: (paymentData.description = "IT Service Intent"),
+      description: (paymentData.description = 'IT Service Intent'),
     });
 
     let payment;
@@ -88,7 +88,7 @@ const createPaymentIntent = async (paymentData) => {
         endDate: new Date(
           new Date().setFullYear(new Date().getFullYear() + 1)
         ).toISOString(),
-        status: "Completed",
+        status: 'Completed',
         promocodeId: promocode._id,
       });
 
@@ -108,11 +108,11 @@ const createPaymentIntent = async (paymentData) => {
     await stripeHelper.updatePaymentIntentInStripe(paymentIntent.id, {
       purchaseId: purchase._id.toString(),
       promocodeId: paymentData.promocodeId.toString(),
-      paymentId: payment ? payment._id : "",
+      paymentId: payment ? payment._id : '',
     });
     return paymentIntent;
   } catch (error) {
-    console.log("Error from create payment intent", {
+    console.log('Error from create payment intent', {
       code: error.statusCode,
       message: error.message,
     });
@@ -124,8 +124,8 @@ const confirmPaymentIntent = async (paymentData) => {
   try {
     const user = await userUtils.getUserById(paymentData.userId);
     if (!user) {
-      console.log("user not found in confirm payment intent");
-      throw new Error("USER_NOT_FOUND");
+      console.log('user not found in confirm payment intent');
+      throw new Error('USER_NOT_FOUND');
     }
     const paymentIntent = await stripeHelper.confirmPaymentIntentInStripe({
       paymentIntentId: paymentData.paymentIntentId,

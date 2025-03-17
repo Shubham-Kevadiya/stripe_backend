@@ -1,4 +1,4 @@
-import paymentIntentService from "./paymentIntent.service.js";
+import paymentIntentService from './paymentIntent.service.js';
 
 const createPaymentIntent = async (req, res, next) => {
   try {
@@ -13,7 +13,7 @@ const createPaymentIntent = async (req, res, next) => {
       clientSecret: paymentIntent.client_secret,
     });
   } catch (error) {
-    console.log("error", "error in create paymentIntent", error);
+    console.log('error', 'error in create paymentIntent', error);
     next(error);
   }
 };
@@ -33,7 +33,7 @@ const confirmPaymentIntent = async (req, res, next) => {
     //   .redirect(paymentIntent.next_action.redirect_to_url.url);
     return res.status(200).json({ paymentIntent });
   } catch (error) {
-    console.log("error", "error in confirm paymentIntent", error);
+    console.log('error', 'error in confirm paymentIntent', error);
     next(error);
   }
 };

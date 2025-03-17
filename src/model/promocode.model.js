@@ -1,10 +1,10 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const promocodeSchema = new mongoose.Schema(
   {
     promocodeFor: {
       type: String,
-      enum: ["one-time", "subscription"],
+      enum: ['one-time', 'subscription'],
       require: true,
     },
     stripeCoupenId: {
@@ -41,7 +41,7 @@ const promocodeSchema = new mongoose.Schema(
     },
     duration: {
       type: String,
-      enum: ["forever", "once", "repeating"],
+      enum: ['forever', 'once', 'repeating'],
       require: true,
     },
     isActive: {
@@ -50,12 +50,12 @@ const promocodeSchema = new mongoose.Schema(
     },
     specificCustomer: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "user",
+      ref: 'user',
     },
     plan: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "product",
+        ref: 'product',
       },
     ],
     maxRedumption: {
@@ -82,4 +82,4 @@ const promocodeSchema = new mongoose.Schema(
   { timestamps: true, versionKey: false }
 );
 
-export const PromocodeModel = new mongoose.model("promocode", promocodeSchema);
+export const PromocodeModel = new mongoose.model('promocode', promocodeSchema);

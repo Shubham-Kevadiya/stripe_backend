@@ -1,18 +1,17 @@
-import common from "../constants/common.js";
-import paymentUtils from "../utils/payment.utils.js";
-import purchaseUtils from "../utils/purchase.utils.js";
-import userUtils from "../utils/user.utils.js";
-import promocodeUtils from "../utils/promocode.utils.js";
-import stripeHelper from "./stripe.helper.js";
+import common from '../constants/common.js';
+import paymentUtils from '../utils/payment.utils.js';
+import promocodeUtils from '../utils/promocode.utils.js';
+import purchaseUtils from '../utils/purchase.utils.js';
+import userUtils from '../utils/user.utils.js';
+import stripeHelper from './stripe.helper.js';
 
 const paymentIntentSuccessHelper = async (paymentIntentId) => {
   try {
-    const paymentIntentObj = await stripeHelper.getPaymentIntentFromStripe(
-      paymentIntentId
-    );
+    const paymentIntentObj =
+      await stripeHelper.getPaymentIntentFromStripe(paymentIntentId);
     if (
       paymentIntentObj.description &&
-      !paymentIntentObj.description.split("").includes("Intent") &&
+      !paymentIntentObj.description.split('').includes('Intent') &&
       paymentIntentObj.invoice
     ) {
       await paymentIntentSuceessHelperForSubscription(paymentIntentObj);
@@ -60,8 +59,8 @@ const paymentIntentSuccessHelper = async (paymentIntentId) => {
       endDate: new Date(
         new Date().setFullYear(new Date().getFullYear() + 1)
       ).toISOString(),
-      nextPaymentDate: "N/A",
-      status: "Completed",
+      nextPaymentDate: 'N/A',
+      status: 'Completed',
       promocodeId: promocode._id,
     });
 
@@ -78,12 +77,12 @@ const paymentIntentSuccessHelper = async (paymentIntentId) => {
       paymentMethod: payment.paymentMethod,
     });
 
-    if (paymentIntentObj.metadata.paymentId != "") {
+    if (paymentIntentObj.metadata.paymentId != '') {
       user.usedPromocodes.push(promocode._id);
       await userUtils.updateUserById({ ...user, userId: user._id });
     }
   } catch (error) {
-    console.log("Error log from payment_intent.succeeded", { error });
+    console.log('Error log from payment_intent.succeeded', { error });
   }
 };
 
@@ -91,7 +90,7 @@ const paymentIntentFailHelper = async (paymentIntentObj) => {
   try {
     if (
       paymentIntentObj.description &&
-      !paymentIntentObj.description.split("").includes("Intent") &&
+      !paymentIntentObj.description.split('').includes('Intent') &&
       paymentIntentObj.invoice
     ) {
       await paymentIntentFailHelperForSubscription(paymentIntentObj);
@@ -114,29 +113,27 @@ const paymentIntentFailHelper = async (paymentIntentObj) => {
       console.log(
         `purchase not found, log from payment_intent.payment_failed`,
         {
-          paymentId: payment._id.toString(),
+          paymentId: purchase._id.toString(),
           userId: user._id.toString(),
         }
       );
     }
 
-    const payment = await paymentUtils.savePayment(
-      new PaymentModel({
-        userId: user._id,
-        stripePaymentId: paymentIntentObj.id,
-        paymentType: common.PAYMENT_TYPE.INTENT,
-        amount: paymentIntentObj.amount,
-        paymentMethod: paymentIntentObj.paymentMethod,
-        clientSecret: paymentIntentObj.client_secret,
-        planId: purchase.planId,
-        stripeChargeId: paymentIntentObj.latest_charge,
-        startDate: "N/A",
-        endDate: "N/A",
-        nextPaymentDate: "N/A",
-        status: "Failed",
-        reason: paymentIntentObj.last_payment_error.message,
-      })
-    );
+    const payment = await paymentUtils.savePayment({
+      userId: user._id,
+      stripePaymentId: paymentIntentObj.id,
+      paymentType: common.PAYMENT_TYPE.INTENT,
+      amount: paymentIntentObj.amount,
+      paymentMethod: paymentIntentObj.paymentMethod,
+      clientSecret: paymentIntentObj.client_secret,
+      planId: purchase.planId,
+      stripeChargeId: paymentIntentObj.latest_charge,
+      startDate: 'N/A',
+      endDate: 'N/A',
+      nextPaymentDate: 'N/A',
+      status: 'Failed',
+      reason: paymentIntentObj.last_payment_error.message,
+    });
 
     await stripeHelper.cancelPaymentIntentInStripe(paymentIntentObj.id);
     // await paymentUtils.updatePaymentById({
@@ -155,7 +152,7 @@ const paymentIntentFailHelper = async (paymentIntentObj) => {
       paymentMethod: payment.paymentMethod,
     });
   } catch (error) {
-    console.log("Error log from payment_intent.payment_failed", { error });
+    console.log('Error log from payment_intent.payment_failed', { error });
   }
 };
 
@@ -163,7 +160,7 @@ const paymentIntentSuceessHelperForSubscription = async (intentObj) => {
   try {
     const user = await userUtils.getUserByStripeCustomerId(intentObj.customer);
     if (!user) {
-      console.log("user not found,log from invoice.payment_succeeded", {
+      console.log('user not found,log from invoice.payment_succeeded', {
         customer: intentObj.customer,
       });
     }
@@ -176,7 +173,7 @@ const paymentIntentSuceessHelperForSubscription = async (intentObj) => {
       );
     if (!subscription) {
       console.log(
-        "subscription not found, log from invoice.payment_succeeded",
+        'subscription not found, log from invoice.payment_succeeded',
         {
           subscriptionId: intentObj.subscription,
         }
@@ -186,7 +183,7 @@ const paymentIntentSuceessHelperForSubscription = async (intentObj) => {
       subscription.metadata.purchaseId
     );
     if (!purchase) {
-      console.log("purchase not found, log from invoice.payment_succeeded", {
+      console.log('purchase not found, log from invoice.payment_succeeded', {
         purchaseId: subscription.metadata.purchaseId,
       });
     }
@@ -200,8 +197,8 @@ const paymentIntentSuceessHelperForSubscription = async (intentObj) => {
       usedCount: promocode.usedCount + 1,
     });
 
-    let startDate = new Date(invoice.created * 1000);
-    let endDate = new Date(
+    const startDate = new Date(invoice.created * 1000);
+    const endDate = new Date(
       new Date().setFullYear(new Date().getFullYear() + 1)
     );
 
@@ -213,26 +210,28 @@ const paymentIntentSuceessHelperForSubscription = async (intentObj) => {
     let nextPaymentDate;
 
     switch (purchase.interval) {
-      case "week":
+      case 'week':
         nextPaymentDate = new Date(
           new Date(invoice.created * 1000).setDate(
             new Date(invoice.created * 1000).getDate() + 7
           )
         );
         break;
-      case "month":
+      case 'month':
         nextPaymentDate = new Date(
           new Date(invoice.created * 1000).setMonth(
             new Date(invoice.created * 1000).getMonth() + 1
           )
         );
         break;
-      case "year":
+      case 'year':
         nextPaymentDate = new Date(
           new Date(invoice.created * 1000).setFullYear(
             new Date(invoice.created * 1000).getFullYear() + 1
           )
         );
+        break;
+      default:
         break;
     }
 
@@ -242,10 +241,10 @@ const paymentIntentSuceessHelperForSubscription = async (intentObj) => {
       paymentIntentId: intentObj.id,
       paymentType: subscription.metadata.paymentType,
       amount: intentObj.amount / 100,
-      paymentMethod: { id: intentObj.payment_method, type: "card" },
+      paymentMethod: { id: intentObj.payment_method, type: 'card' },
       planId: subscription.metadata.planId,
       stripeChargeId: intentObj.charge,
-      status: "Completed",
+      status: 'Completed',
       startDate: startDate.toISOString(),
       endDate: nextPaymentDate.toISOString(),
       nextPaymentDate: nextPaymentDate.toISOString(),
@@ -267,7 +266,7 @@ const paymentIntentSuceessHelperForSubscription = async (intentObj) => {
       paymentMethod: payment.paymentMethod,
     });
   } catch (error) {
-    console.log("Error log from invoice.payment_succeeded", { error });
+    console.log('Error log from invoice.payment_succeeded', { error });
   }
 };
 
@@ -275,7 +274,7 @@ const invoiceSuceessHelper = async (invoiceObj) => {
   try {
     const user = await userUtils.getUserByStripeCustomerId(invoiceObj.customer);
     if (!user) {
-      console.log("user not found,log from invoice.payment_succeeded", {
+      console.log('user not found,log from invoice.payment_succeeded', {
         customer: invoiceObj.customer,
       });
     }
@@ -287,7 +286,7 @@ const invoiceSuceessHelper = async (invoiceObj) => {
       paymentType: common.PAYMENT_TYPE.SUBSCRIPTION,
     });
     if (!payment) {
-      console.log("payment not found, log from invoice.payment_succeeded", {
+      console.log('payment not found, log from invoice.payment_succeeded', {
         paymentId: invoiceObj.subscription,
       });
     }
@@ -298,7 +297,7 @@ const invoiceSuceessHelper = async (invoiceObj) => {
       );
     if (!subscription) {
       console.log(
-        "subscription not found, log from invoice.payment_succeeded",
+        'subscription not found, log from invoice.payment_succeeded',
         {
           subscriptionId: invoiceObj.subscription,
         }
@@ -309,7 +308,7 @@ const invoiceSuceessHelper = async (invoiceObj) => {
       subscription.metadata.purchaseId
     );
     if (!purchase) {
-      console.log("purchase not found, log from invoice.payment_succeeded", {
+      console.log('purchase not found, log from invoice.payment_succeeded', {
         purchaseId: subscription.metadata.purchaseId,
       });
     }
@@ -320,7 +319,7 @@ const invoiceSuceessHelper = async (invoiceObj) => {
     if (payment.paymentMethod.id != paymentIntent.payment_method) {
       payment.paymentMethod = {
         id: paymentIntent.payment_method,
-        type: "card",
+        type: 'card',
       };
     }
 
@@ -328,7 +327,7 @@ const invoiceSuceessHelper = async (invoiceObj) => {
       ...payment,
       paymentId: payment._id,
       stripeChargeId: invoiceObj.charge,
-      status: "Completed",
+      status: 'Completed',
     });
 
     const planEndDate = new Date(
@@ -337,20 +336,22 @@ const invoiceSuceessHelper = async (invoiceObj) => {
     let nextPaymentDate;
 
     switch (purchase.interval) {
-      case "week":
+      case 'week':
         nextPaymentDate = new Date(
           new Date().setDate(new Date().getDate() + 7)
         );
         break;
-      case "month":
+      case 'month':
         nextPaymentDate = new Date(
           new Date().setMonth(new Date().getMonth() + 1)
         );
         break;
-      case "year":
+      case 'year':
         nextPaymentDate = new Date(
           new Date().setFullYear(new Date().getFullYear() + 1)
         );
+        break;
+      default:
         break;
     }
 
@@ -370,7 +371,7 @@ const invoiceSuceessHelper = async (invoiceObj) => {
         nextPaymentDate.getMonth() + 1
       }/${nextPaymentDate.getFullYear()}`,
       amount: invoiceObj.total / 100,
-      status: "success",
+      status: 'success',
       paymentMethod: payment.paymentMethod,
     });
 
@@ -387,7 +388,7 @@ const invoiceSuceessHelper = async (invoiceObj) => {
       paymentMethod: payment.paymentMethod,
     });
   } catch (error) {
-    console.log("Error log from invoice.payment_succeeded", { error });
+    console.log('Error log from invoice.payment_succeeded', { error });
   }
 };
 
@@ -395,7 +396,7 @@ const paymentIntentFailHelperForSubscription = async (intentObj) => {
   try {
     const user = await userUtils.getUserByStripeCustomerId(intentObj.customer);
     if (!user) {
-      console.log("user not found,log from invoice.payment_failed", {
+      console.log('user not found,log from invoice.payment_failed', {
         customer: intentObj.customer,
       });
     }
@@ -404,7 +405,7 @@ const paymentIntentFailHelperForSubscription = async (intentObj) => {
       intentObj.invoice
     );
     if (!invoice) {
-      console.log("invoice not found, log from invoice.payment_failed", {
+      console.log('invoice not found, log from invoice.payment_failed', {
         subscriptionId: intentObj.invoice,
       });
     }
@@ -415,7 +416,7 @@ const paymentIntentFailHelperForSubscription = async (intentObj) => {
         invoice.subscription
       );
     if (!subscription) {
-      console.log("subscription not found, log from invoice.payment_failed", {
+      console.log('subscription not found, log from invoice.payment_failed', {
         subscriptionId: intentObj.subscription,
       });
     }
@@ -424,7 +425,7 @@ const paymentIntentFailHelperForSubscription = async (intentObj) => {
       subscription.metadata.purchaseId
     );
     if (!purchase) {
-      console.log("purchase not found, log from invoice.payment_failed", {
+      console.log('purchase not found, log from invoice.payment_failed', {
         purchaseId: subscription.metadata.purchaseId,
       });
     }
@@ -437,15 +438,15 @@ const paymentIntentFailHelperForSubscription = async (intentObj) => {
       amount: intentObj.amount / 100,
       paymentMethod: {
         id: intentObj.last_payment_error.payment_method.id,
-        type: "card",
+        type: 'card',
       },
       planId: subscription.metadata.planId,
-      status: "Failed",
+      status: 'Failed',
       reason: intentObj.last_payment_error.message,
-      startDate: "N/A",
-      endDate: "N/A",
-      nextPaymentDate: "N/A",
-      invoiceURL: "N/A",
+      startDate: 'N/A',
+      endDate: 'N/A',
+      nextPaymentDate: 'N/A',
+      invoiceURL: 'N/A',
       promocodeId: subscription.metedata.promocodeId,
     });
 
@@ -458,7 +459,7 @@ const paymentIntentFailHelperForSubscription = async (intentObj) => {
       transactionHistory: purchase.transactionHistory,
     });
   } catch (error) {
-    console.log("Error log from invoice.payment_failed", { error });
+    console.log('Error log from invoice.payment_failed', { error });
   }
 };
 
@@ -466,7 +467,7 @@ const invoiceFailHelper = async (invoiceObj) => {
   try {
     const user = await userUtils.getUserByStripeCustomerId(invoiceObj.customer);
     if (!user) {
-      console.log("user not found,log from invoice.payment_failed", {
+      console.log('user not found,log from invoice.payment_failed', {
         customer: invoiceObj.customer,
       });
     }
@@ -477,7 +478,7 @@ const invoiceFailHelper = async (invoiceObj) => {
       paymentType: common.PAYMENT_TYPE.SUBSCRIPTION,
     });
     if (!payment) {
-      console.log("payment not found, log from invoice.payment_failed", {
+      console.log('payment not found, log from invoice.payment_failed', {
         userId: user._id.toString(),
         stripePaymentId: invoiceObj.subscription,
         amount: invoiceObj.total / 100,
@@ -489,7 +490,7 @@ const invoiceFailHelper = async (invoiceObj) => {
         invoiceObj.subscription
       );
     if (!subscription) {
-      console.log("subscription not found, log from invoice.payment_failed", {
+      console.log('subscription not found, log from invoice.payment_failed', {
         subscriptionId: invoiceObj.subscription,
       });
     }
@@ -497,7 +498,7 @@ const invoiceFailHelper = async (invoiceObj) => {
       subscription.metadata.purchaseId
     );
     if (!purchase) {
-      console.log("purchase not found, log from invoice.payment_failed", {
+      console.log('purchase not found, log from invoice.payment_failed', {
         purchaseId: subscription.metadata.purchaseId,
       });
     }
@@ -505,17 +506,17 @@ const invoiceFailHelper = async (invoiceObj) => {
     await paymentUtils.updatePaymentById({
       ...payment,
       paymentId: payment._id,
-      status: "Failed",
+      status: 'Failed',
       paymentMethod: payment.paymentMethod,
     });
 
     purchase.transactionHistory.push({
-      invoiceURL: "N/A",
-      startDate: "N/A",
-      endDate: "N/A",
-      nextPaymentDate: "N/A",
+      invoiceURL: 'N/A',
+      startDate: 'N/A',
+      endDate: 'N/A',
+      nextPaymentDate: 'N/A',
       amount: invoiceObj.total / 100,
-      status: "failed",
+      status: 'failed',
     });
 
     await purchaseUtils.updatePurchaseById({
@@ -525,7 +526,7 @@ const invoiceFailHelper = async (invoiceObj) => {
       transactionHistory: purchase.transactionHistory,
     });
   } catch (error) {
-    console.log("Error log from invoice.payment_failed", { error });
+    console.log('Error log from invoice.payment_failed', { error });
   }
 };
 
@@ -535,7 +536,7 @@ const subscriptionCancelHelper = async (subscriptionObj) => {
       subscriptionObj.customer
     );
     if (!user) {
-      console.log("user not found,log from customer.subscription.deleted", {
+      console.log('user not found,log from customer.subscription.deleted', {
         customer: subscriptionObj.customer,
       });
     }
@@ -545,7 +546,7 @@ const subscriptionCancelHelper = async (subscriptionObj) => {
       );
     if (!subscriptionToCancel) {
       console.log(
-        "subscription not found, log from customer.subscription.deleted",
+        'subscription not found, log from customer.subscription.deleted',
         {
           subscriptionId: subscriptionObj.subscription,
         }
@@ -557,7 +558,7 @@ const subscriptionCancelHelper = async (subscriptionObj) => {
     );
     if (!purchase) {
       console.log(
-        "purchase not found, log from customer.subscription.deleted",
+        'purchase not found, log from customer.subscription.deleted',
         {
           purchaseId: subscriptionToCancel.metadata.purchaseId,
         }
@@ -565,13 +566,12 @@ const subscriptionCancelHelper = async (subscriptionObj) => {
     }
 
     await purchaseUtils.updatePurchaseById({
-      paymentId: payment._id,
       purchaseId: purchase._id,
       isCanceled: true,
       planEndDate: new Date(),
     });
   } catch (error) {
-    console.log("Error log from customer.subscription.deleted", { error });
+    console.log('Error log from customer.subscription.deleted', { error });
   }
 };
 export default {

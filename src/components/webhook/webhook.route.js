@@ -1,11 +1,11 @@
-import express from "express";
-import webhookController from "./webhook.controller.js";
+import express from 'express';
+import webhookController from './webhook.controller.js';
 
 const webhookRoute = express.Router();
 
 webhookRoute.post(
-  "/",
-  express.raw({ type: "application/json" }),
+  '/',
+  express.raw({ type: 'application/json' }),
   webhookController.listenToWebhook
 );
 

@@ -1,24 +1,24 @@
-import stripeHelper from "../../helper/stripe.helper.js";
-import userUtils from "../../utils/user.utils.js";
-import purchaseUtils from "../../utils/purchase.utils.js";
-import promocodeUtils from "../../utils/promocode.utils.js";
-import common from "../../constants/common.js";
-import paymentUtils from "../../utils/payment.utils.js";
+import common from '../../constants/common.js';
+import stripeHelper from '../../helper/stripe.helper.js';
+import paymentUtils from '../../utils/payment.utils.js';
+import promocodeUtils from '../../utils/promocode.utils.js';
+import purchaseUtils from '../../utils/purchase.utils.js';
+import userUtils from '../../utils/user.utils.js';
 
 const createSubscription = async (subscriptionData) => {
   try {
     const user = await userUtils.getUserById(subscriptionData.userId);
     if (!user) {
-      console.log("user not found in pause subscription");
-      throw new Error("USER_NOT_FOUND");
+      console.log('user not found in pause subscription');
+      throw new Error('USER_NOT_FOUND');
     }
 
-    const paymentMethods = user.paymentMethod.map((a) => {
-      return a.id;
+    const paymentMethods = user.paymentMethod.map((paymentMethod) => {
+      return paymentMethod.id;
     });
     if (!paymentMethods.includes(subscriptionData.paymentMethodId)) {
-      console.log("user has no payment method with this id");
-      throw new Error("PAYMENT_METHOD_NOT_FOUND");
+      console.log('user has no payment method with this id');
+      throw new Error('PAYMENT_METHOD_NOT_FOUND');
     }
 
     const promocode = await promocodeUtils.getPromocodeById(
@@ -26,22 +26,22 @@ const createSubscription = async (subscriptionData) => {
     );
 
     if (!promocode) {
-      console.log("Promocode not found in create subscription", {
+      console.log('Promocode not found in create subscription', {
         promocodeId: subscriptionData.stripePromocodeId,
       });
-      throw new Error("NOT_FOUND");
+      throw new Error('NOT_FOUND');
     }
 
     if (!promocode.isActive || promocode.isDeleted) {
-      console.log("currently promocode is not available");
-      throw new Error("CONFLICT");
+      console.log('currently promocode is not available');
+      throw new Error('CONFLICT');
     }
 
-    if (promocode.promocodeFor != "subscription") {
+    if (promocode.promocodeFor != 'subscription') {
       console.log(`Invalid promocode for ${promocode.promocodeFor}`, {
         promocodeId: promocode._id,
       });
-      throw new Error("CONFLICT");
+      throw new Error('CONFLICT');
     }
 
     const subscription = await stripeHelper.createSubscriptionInStripe(
@@ -52,8 +52,8 @@ const createSubscription = async (subscriptionData) => {
       promocode.stripePromocodeId
     );
 
-    let startDate = new Date();
-    let endDate = new Date(
+    const startDate = new Date();
+    const endDate = new Date(
       new Date().setFullYear(new Date().getFullYear() + 1)
     );
 
@@ -64,27 +64,29 @@ const createSubscription = async (subscriptionData) => {
     ) {
       let nextPaymentDate;
       switch (subscriptionData.interval) {
-        case "week":
+        case 'week':
           nextPaymentDate = new Date(
             new Date(new Date()).setDate(new Date(new Date()).getDate() + 7)
           );
           break;
-        case "month":
+        case 'month':
           nextPaymentDate = new Date(
             new Date(new Date()).setMonth(new Date(new Date()).getMonth() + 1)
           );
           break;
-        case "year":
+        case 'year':
           nextPaymentDate = new Date(
             new Date(new Date()).setFullYear(
               new Date(new Date()).getFullYear() + 1
             )
           );
           break;
+        default:
+          break;
       }
       const paymentMethod = {
         id: subscriptionData.paymentMethodId,
-        type: "card",
+        type: 'card',
       };
       payment = await paymentUtils.savePayment({
         userId: user._id,
@@ -96,7 +98,7 @@ const createSubscription = async (subscriptionData) => {
         startDate: startDate.toISOString(),
         endDate: nextPaymentDate.toISOString(),
         nextPaymentDate: nextPaymentDate.toISOString(),
-        status: "Completed",
+        status: 'Completed',
         promocodeId: promocode._id,
       });
     }
@@ -127,7 +129,7 @@ const createSubscription = async (subscriptionData) => {
     });
     return subscription;
   } catch (error) {
-    console.log("Error from create subscription service", { error });
+    console.log('Error from create subscription service', { error });
     throw new Error(error.message);
   }
 };
@@ -136,8 +138,8 @@ const updateSubscription = async (subscriptionData) => {
   try {
     const user = await userUtils.getUserById(subscriptionData.userId);
     if (!user) {
-      console.log("user not found in pause subscription");
-      throw new Error("USER_NOT_FOUND");
+      console.log('user not found in pause subscription');
+      throw new Error('USER_NOT_FOUND');
     }
 
     await stripeHelper.updatePaymentMethodOfSubscriptionInStripe(
@@ -145,9 +147,9 @@ const updateSubscription = async (subscriptionData) => {
       subscriptionData.paymentMethodId
     );
 
-    return "subscription updated successfully";
+    return 'subscription updated successfully';
   } catch (error) {
-    console.log("Error from update subscription service", { error });
+    console.log('Error from update subscription service', { error });
     throw new Error(error.message);
   }
 };
@@ -156,23 +158,23 @@ const pauseSubscription = async (subscriptionData) => {
   try {
     const user = await userUtils.getUserById(subscriptionData.userId);
     if (!user) {
-      console.log("user not found in pause subscription");
-      throw new Error("USER_NOT_FOUND");
+      console.log('user not found in pause subscription');
+      throw new Error('USER_NOT_FOUND');
     }
     const existingPurchase = await purchaseUtils.getPurchaseById(
       subscriptionData.purchaseId
     );
     if (!existingPurchase) {
-      console.log("purchase not found in pause subscription");
-      throw new Error("RESOURCE_NOT_FOUND");
+      console.log('purchase not found in pause subscription');
+      throw new Error('RESOURCE_NOT_FOUND');
     }
     // if (existingPurchase.isPaused) {
     //   console.log("You have already paused the plan");
     //   throw new Error("CONFLICT");
     // }
-    if (existingPurchase.planType == "One Time") {
-      console.log("You have purchase One Time plan", { subscriptionData });
-      throw new Error("BAD_CREDENTIALS");
+    if (existingPurchase.planType == 'One Time') {
+      console.log('You have purchase One Time plan', { subscriptionData });
+      throw new Error('BAD_CREDENTIALS');
     }
 
     const subscription =
@@ -180,9 +182,7 @@ const pauseSubscription = async (subscriptionData) => {
         subscriptionData.subscriptionId
       );
 
-    const resetSubscription = await stripeHelper.resetSubscriptionTimeInStripe(
-      subscription.id
-    );
+    await stripeHelper.resetSubscriptionTimeInStripe(subscription.id);
 
     await stripeHelper.pauseSubscriptionInStripe(
       subscriptionData.stripeSubscriptionId
@@ -196,7 +196,7 @@ const pauseSubscription = async (subscriptionData) => {
 
     return subscription;
   } catch (error) {
-    console.log("Error from pause subscription service", { error });
+    console.log('Error from pause subscription service', { error });
     throw new Error(error.message);
   }
 };
@@ -205,19 +205,19 @@ const resumeSubscription = async (subscriptionData) => {
   try {
     const user = await userUtils.getUserById(subscriptionData.userId);
     if (!user) {
-      console.log("user not found in resume subscription");
-      throw new Error("USER_NOT_FOUND");
+      console.log('user not found in resume subscription');
+      throw new Error('USER_NOT_FOUND');
     }
     const existingPurchase = await purchaseUtils.getPurchaseById(
       subscriptionData.purchaseId
     );
     if (!existingPurchase) {
-      console.log("purchase not found in resume subscription");
-      throw new Error("RESOURCE_NOT_FOUND");
+      console.log('purchase not found in resume subscription');
+      throw new Error('RESOURCE_NOT_FOUND');
     }
-    if (existingPurchase.planType == "One Time") {
-      console.log("You have purchase One Time plan", { subscriptionData });
-      throw new Error("BAD_CREDENTIALS");
+    if (existingPurchase.planType == 'One Time') {
+      console.log('You have purchase One Time plan', { subscriptionData });
+      throw new Error('BAD_CREDENTIALS');
     }
 
     const subscription =
@@ -271,9 +271,9 @@ const resumeSubscription = async (subscriptionData) => {
       isResumed: true,
     });
 
-    return invoiceToPay ? invoiceToPay.hosted_invoice_url : "";
+    return invoiceToPay ? invoiceToPay.hosted_invoice_url : '';
   } catch (error) {
-    console.log("Error from resume subscription service", { error });
+    console.log('Error from resume subscription service', { error });
     throw new Error(error.message);
   }
 };
@@ -282,15 +282,15 @@ const cancelSubscription = async (subscriptionData) => {
   try {
     const user = await userUtils.getUserById(subscriptionData.userId);
     if (!user) {
-      console.log("user not found in pause subscription");
-      throw new Error("USER_NOT_FOUND");
+      console.log('user not found in pause subscription');
+      throw new Error('USER_NOT_FOUND');
     }
     const existingPurchase = await purchaseUtils.getPurchaseById(
       subscriptionData.purchaseId
     );
     if (!existingPurchase) {
-      console.log("purchase not found in pause subscription");
-      throw new Error("RESOURCE_NOT_FOUND");
+      console.log('purchase not found in pause subscription');
+      throw new Error('RESOURCE_NOT_FOUND');
     }
     const subscription = await stripeHelper.cancelSubscriptionInStripe(
       subscriptionData.subscriptionId,
@@ -304,7 +304,7 @@ const cancelSubscription = async (subscriptionData) => {
 
     return subscription;
   } catch (error) {
-    console.log("Error from cancel subscription service", { error });
+    console.log('Error from cancel subscription service', { error });
     throw new Error(error.message);
   }
 };

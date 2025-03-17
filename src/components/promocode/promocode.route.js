@@ -1,13 +1,13 @@
-import express from "express";
-import promocodeValidate from "../../middleware/validation.js";
-import promocodeValidateSchema from "./promocode.validate.js";
-import promocodeController from "./promocode.controller.js";
-import authenticateUser from "../../middleware/authenticateUser.js";
+import express from 'express';
+import promocodeValidate from '../../middleware/validation.js';
+import promocodeValidateSchema from './promocode.validate.js';
+import promocodeController from './promocode.controller.js';
+import authenticateUser from '../../middleware/authenticateUser.js';
 
 const promocodeRoute = express.Router();
 
 promocodeRoute.post(
-  "/create",
+  '/create',
   authenticateUser.validateAuthIdToken,
   promocodeValidate.validateBodySchema(
     promocodeValidateSchema.createPromocodeSchema
@@ -15,12 +15,12 @@ promocodeRoute.post(
   promocodeController.createPromocode
 );
 promocodeRoute.get(
-  "/",
+  '/',
   authenticateUser.validateAuthIdToken,
   promocodeController.getAllPromocode
 );
 promocodeRoute.post(
-  "/active/:type",
+  '/active/:type',
   authenticateUser.validateAuthIdToken,
   promocodeValidate.validateBodySchema(
     promocodeValidateSchema.getActivePromocodeAccordingToPlanSchema
@@ -28,13 +28,13 @@ promocodeRoute.post(
   promocodeController.getActivePromocodeAccordingToPlan
 );
 promocodeRoute.get(
-  "/:promocodeId",
+  '/:promocodeId',
   authenticateUser.validateAuthIdToken,
   promocodeController.getPromocodeById
 );
 
 promocodeRoute.put(
-  "/update/:promocodeId",
+  '/update/:promocodeId',
   authenticateUser.validateAuthIdToken,
   promocodeValidate.validateBodySchema(
     promocodeValidateSchema.updatePromocodeSchema
@@ -42,7 +42,7 @@ promocodeRoute.put(
   promocodeController.updatePromocodeById
 );
 promocodeRoute.delete(
-  "/delete/:promocodeId",
+  '/delete/:promocodeId',
   authenticateUser.validateAuthIdToken,
   promocodeValidate.validateBodySchema(
     promocodeValidateSchema.deletePromocodeSchema

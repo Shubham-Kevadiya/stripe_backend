@@ -1,12 +1,12 @@
 const validateBodySchema = (validateSchema) => {
   return async (req, res, next) => {
     try {
-      const payloadValue = await validateSchema.validateAsync(req.body, {
+      await validateSchema.validateAsync(req.body, {
         abortEarly: false,
       });
       next();
     } catch (error) {
-      console.log("Error from body validation");
+      console.log('Error from body validation');
       const errorMsg = error.details.map((err) => {
         return err.message;
       });
@@ -18,12 +18,12 @@ const validateBodySchema = (validateSchema) => {
 const validateParamSchema = (validateSchema) => {
   return async (req, res, next) => {
     try {
-      const payloadValue = await validateSchema.validateAsync(req.params, {
+      await validateSchema.validateAsync(req.params, {
         abortEarly: false,
       });
       next();
     } catch (error) {
-      console.log("Error from param validation");
+      console.log('Error from param validation');
       const errorMsg = error.details.map((err) => {
         return err.message;
       });
@@ -35,12 +35,12 @@ const validateParamSchema = (validateSchema) => {
 const validateQuerySchema = (validateSchema) => {
   return async (req, res, next) => {
     try {
-      const payloadValue = await validateSchema.validateAsync(req.query, {
+      await validateSchema.validateAsync(req.query, {
         abortEarly: false,
       });
       next();
     } catch (error) {
-      console.log("Error from query validation");
+      console.log('Error from query validation');
       const errorMsg = error.details.map((err) => {
         return err.message;
       });

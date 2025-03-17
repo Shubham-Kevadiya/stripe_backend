@@ -1,4 +1,4 @@
-import { UserModel } from "../model/user.model.js";
+import { UserModel } from '../model/user.model.js';
 
 const saveUser = async (userData) => {
   const user = await new UserModel(userData).save();
@@ -38,7 +38,7 @@ const updateUserById = async (userData) => {
 
 const deleteUserById = async (userId) => {
   await UserModel.findByIdAndDelete(userId);
-  return "user deleted successsfully !";
+  return 'user deleted successsfully !';
 };
 
 export default {

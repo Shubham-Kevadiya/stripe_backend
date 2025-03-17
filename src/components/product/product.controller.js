@@ -1,4 +1,4 @@
-import productService from "./product.service.js";
+import productService from './product.service.js';
 
 const createProduct = async (req, res, next) => {
   try {
@@ -6,7 +6,7 @@ const createProduct = async (req, res, next) => {
     const product = await productService.createProduct(payloadValue);
     return res.status(200).json(product);
   } catch (error) {
-    console.log("error", "error in create product", error);
+    console.log('error', 'error in create product', error);
     next(error);
   }
 };
@@ -21,7 +21,7 @@ const updateProduct = async (req, res, next) => {
     });
     return res.status(200).json({ updatedProduct });
   } catch (error) {
-    console.log("error", "error in update product", error);
+    console.log('error', 'error in update product', error);
     next(error);
   }
 };
@@ -33,7 +33,7 @@ const getAllProduct = async (req, res, next) => {
     const product = await productService.getProducts(page, limit);
     return res.status(200).json({ product });
   } catch (error) {
-    console.log("error", "error in get all product", error);
+    console.log('error', 'error in get all product', error);
     next(error);
   }
 };
@@ -44,7 +44,7 @@ const getProductById = async (req, res, next) => {
     const product = await productService.getProductById(productId);
     return res.status(200).json({ product });
   } catch (error) {
-    console.log("error", "error in get product by id", error);
+    console.log('error', 'error in get product by id', error);
     next(error);
   }
 };
@@ -53,9 +53,9 @@ const deleteProduct = async (req, res, next) => {
   try {
     const productId = req.params.productId;
     await productService.deleteProduct(productId);
-    return res.status(200).json({ msg: "product deleted successfully" });
+    return res.status(200).json({ msg: 'product deleted successfully' });
   } catch (error) {
-    console.log("error", "error in delete product", error);
+    console.log('error', 'error in delete product', error);
     next(error);
   }
 };

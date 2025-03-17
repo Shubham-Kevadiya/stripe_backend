@@ -1,4 +1,4 @@
-import { PurchaseModel } from "../model/purchase.model.js";
+import { PurchaseModel } from '../model/purchase.model.js';
 
 const savePurchase = async (purchaseData) => {
   const purchase = await new PurchaseModel(purchaseData).save();
@@ -20,15 +20,15 @@ const getPurchaseById = async (purchaseId) => {
 const getFilteredPurchaseOfUser = async (query) => {
   const purchase = await PurchaseModel.find(query)
     .populate({
-      path: "userId",
-      select: "name email age address userType",
+      path: 'userId',
+      select: 'name email age address userType',
     })
     .populate({
-      path: "planId",
-      select: "-createdAt -updatedAt",
+      path: 'planId',
+      select: '-createdAt -updatedAt',
     })
     .populate({
-      path: "paymentId",
+      path: 'paymentId',
     })
     .lean();
   return purchase;
@@ -42,8 +42,8 @@ const getPurchaseByPaymentMethod = async (query) => {
 const updatePurchaseById = async (purchaseData) => {
   const purchase = await getPurchaseById(purchaseData.purchaseId);
   if (!purchase) {
-    console.log("purchase not found in update purchase");
-    throw new Error("NOT_FOUND");
+    console.log('purchase not found in update purchase');
+    throw new Error('NOT_FOUND');
   }
   const updatedPurchase = await PurchaseModel.findByIdAndUpdate(
     purchaseData.purchaseId,
@@ -56,11 +56,11 @@ const updatePurchaseById = async (purchaseData) => {
 const deletePurchaseById = async (purchaseId) => {
   const purchase = await getPurchaseById(purchaseId);
   if (!purchase) {
-    console.log("purchase not found in delete purchase");
-    throw new Error("NOT_FOUND");
+    console.log('purchase not found in delete purchase');
+    throw new Error('NOT_FOUND');
   }
   await PurchaseModel.findByIdAndDelete(purchaseId);
-  return "purchase deleted successsfully !";
+  return 'purchase deleted successsfully !';
 };
 
 export default {

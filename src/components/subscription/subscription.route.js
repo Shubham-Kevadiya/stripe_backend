@@ -1,13 +1,13 @@
-import express from "express";
-import subscriptionValidateSchema from "./subscription.validate.js";
-import subscriptionController from "./subscription.controller.js";
-import authenticateUser from "../../middleware/authenticateUser.js";
-import subscriptionValidate from "../../middleware/validation.js";
+import express from 'express';
+import subscriptionValidateSchema from './subscription.validate.js';
+import subscriptionController from './subscription.controller.js';
+import authenticateUser from '../../middleware/authenticateUser.js';
+import subscriptionValidate from '../../middleware/validation.js';
 
 const subscriptionRoute = express.Router();
 
 subscriptionRoute.post(
-  "/create",
+  '/create',
   authenticateUser.validateAuthIdToken,
   subscriptionValidate.validateBodySchema(
     subscriptionValidateSchema.createSubscriptionSchema
@@ -15,7 +15,7 @@ subscriptionRoute.post(
   subscriptionController.createSubscription
 );
 subscriptionRoute.put(
-  "/update/:subscriptionId",
+  '/update/:subscriptionId',
   authenticateUser.validateAuthIdToken,
   subscriptionValidate.validateBodySchema(
     subscriptionValidateSchema.updateSubscriptionSchema
@@ -23,7 +23,7 @@ subscriptionRoute.put(
   subscriptionController.updateSubscription
 );
 subscriptionRoute.put(
-  "/pause/:subscriptionId",
+  '/pause/:subscriptionId',
   authenticateUser.validateAuthIdToken,
   subscriptionValidate.validateBodySchema(
     subscriptionValidateSchema.validatePurchaseIdSchema
@@ -31,7 +31,7 @@ subscriptionRoute.put(
   subscriptionController.pauseSubscription
 );
 subscriptionRoute.put(
-  "/resume/:subscriptionId",
+  '/resume/:subscriptionId',
   authenticateUser.validateAuthIdToken,
   subscriptionValidate.validateBodySchema(
     subscriptionValidateSchema.validatePurchaseIdSchema
@@ -39,7 +39,7 @@ subscriptionRoute.put(
   subscriptionController.resumeSubscription
 );
 subscriptionRoute.delete(
-  "/cancel/:subscriptionId",
+  '/cancel/:subscriptionId',
   authenticateUser.validateAuthIdToken,
   subscriptionValidate.validateBodySchema(
     subscriptionValidateSchema.cancelSubscriptionSchema

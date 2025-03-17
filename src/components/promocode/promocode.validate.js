@@ -1,31 +1,31 @@
-import Joi from "joi";
+import Joi from 'joi';
 
 const createPromocodeSchema = Joi.object({
-  promocodeFor: Joi.string().valid("one-time", "subscription").required(),
-  coupenName: Joi.string().when("promocodeFor", {
-    is: "subscription",
+  promocodeFor: Joi.string().valid('one-time', 'subscription').required(),
+  coupenName: Joi.string().when('promocodeFor', {
+    is: 'subscription',
     then: Joi.required(),
     otherwise: Joi.forbidden(),
   }),
   promocode: Joi.string().required(),
   currency: Joi.string().required(),
-  duration: Joi.string().valid("forever", "once", "repeating").required(),
+  duration: Joi.string().valid('forever', 'once', 'repeating').required(),
   // .when("promocodeFor", {
   //   is: "subscription",
   //   then: Joi.required(),
   //   otherwise: Joi.forbidden(),
   // })
-  durationInMonths: Joi.number().when("promocodeFor", {
-    is: "subscription",
-    then: Joi.when("duration", {
-      is: "repeating",
+  durationInMonths: Joi.number().when('promocodeFor', {
+    is: 'subscription',
+    then: Joi.when('duration', {
+      is: 'repeating',
       then: Joi.required(),
       otherwise: Joi.optional(),
     }),
     otherwise: Joi.forbidden(),
   }),
   discountInAmount: Joi.number().required().allow(0),
-  discountInPercentage: Joi.number().when("discountInAmount", {
+  discountInPercentage: Joi.number().when('discountInAmount', {
     is: 0,
     then: Joi.required(),
     otherwise: Joi.forbidden(),
@@ -38,7 +38,7 @@ const createPromocodeSchema = Joi.object({
 });
 
 const updatePromocodeSchema = Joi.object({
-  coupenName: Joi.string().optional().allow(""),
+  coupenName: Joi.string().optional().allow(''),
   isActive: Joi.boolean().optional(),
 });
 

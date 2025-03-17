@@ -1,4 +1,4 @@
-import subscriptionService from "./subscription.service.js";
+import subscriptionService from './subscription.service.js';
 
 const createSubscription = async (req, res, next) => {
   try {
@@ -15,7 +15,7 @@ const createSubscription = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.log("error", "error in create subscription", error);
+    console.log('error', 'error in create subscription', error);
     next(error);
   }
 };
@@ -31,10 +31,10 @@ const updateSubscription = async (req, res, next) => {
       userId,
     });
     return res.status(200).json({
-      msg: "Payment method updated successfully in subscription",
+      msg: 'Payment method updated successfully in subscription',
     });
   } catch (error) {
-    console.log("error", "error in update subscription", error);
+    console.log('error', 'error in update subscription', error);
     next(error);
   }
 };
@@ -49,9 +49,9 @@ const pauseSubscription = async (req, res, next) => {
       userId,
       stripeSubscriptionId,
     });
-    return res.status(200).json({ msg: "subscription pause successfully" });
+    return res.status(200).json({ msg: 'subscription pause successfully' });
   } catch (error) {
-    console.log("error", "error in pause subscription", error);
+    console.log('error', 'error in pause subscription', error);
     next(error);
   }
 };
@@ -66,14 +66,12 @@ const resumeSubscription = async (req, res, next) => {
       userId,
       subscriptionId,
     });
-    return res
-      .status(200)
-      .json({
-        msg: "subscription resume successfully",
-        url: invoiceToPay ? invoiceToPay : "",
-      });
+    return res.status(200).json({
+      msg: 'subscription resume successfully',
+      url: invoiceToPay ? invoiceToPay : '',
+    });
   } catch (error) {
-    console.log("error", "error in resume subscription", error);
+    console.log('error', 'error in resume subscription', error);
     next(error);
   }
 };
@@ -88,9 +86,9 @@ const cancelSubscription = async (req, res, next) => {
       userId,
       subscriptionId,
     });
-    return res.status(200).json({ msg: "Subscription canceled successfully" });
+    return res.status(200).json({ msg: 'Subscription canceled successfully' });
   } catch (error) {
-    console.log("error", "error in cancel subscription", error);
+    console.log('error', 'error in cancel subscription', error);
     next(error);
   }
 };

@@ -1,4 +1,4 @@
-import Joi from "joi";
+import Joi from 'joi';
 
 const getAllFilteredPurchaseOfUserSchema = Joi.object({
   isCanceled: Joi.boolean().optional(),
@@ -6,7 +6,7 @@ const getAllFilteredPurchaseOfUserSchema = Joi.object({
   isFinished: Joi.boolean().optional(),
   isActive: Joi.boolean().optional(),
   paymentFailed: Joi.boolean().optional(),
-  type: Joi.string().valid("one-time", "subscription").optional(),
+  type: Joi.string().valid('one-time', 'subscription').optional(),
 });
 
 export default {

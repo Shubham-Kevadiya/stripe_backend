@@ -1,13 +1,12 @@
-import Stripe from "stripe";
-import config from "../config/config.js";
-import common from "../constants/common.js";
+import Stripe from 'stripe';
+import config from '../config/config.js';
+import common from '../constants/common.js';
 
 const stripe = Stripe(config.stipe.secret_key, {
   maxNetworkRetries: 2,
 });
 
 // customer
-
 const createCustomerInStripe = async (customerData) => {
   const customer = await stripe.customers.create({
     name: customerData.name,
@@ -51,7 +50,7 @@ const updateProductNameInStripe = async (productId, productName) => {
 
 const deleteProductInStripe = async (productId) => {
   await stripe.products.del(productId);
-  return "Product deleted successfully";
+  return 'Product deleted successfully';
 };
 
 //price
@@ -65,14 +64,14 @@ const updatePriceInStripe = async (priceId, status) => {
   await stripe.prices.update(priceId, {
     active: status,
   });
-  return "Price updated successfully";
+  return 'Price updated successfully';
 };
 
 const deletePriceInStripe = async (priceId, status) => {
   await stripe.prices.update(priceId, {
     active: status,
   });
-  return "Price updated successfully";
+  return 'Price updated successfully';
 };
 
 // const createTokenForPaymenthodInStripe = async (cardData) => {
@@ -162,8 +161,8 @@ const createPaymentIntentInStripe = async ({
     currency: currency,
     customer: customerId,
     payment_method: paymentMethod,
-    description: description ? description : "",
-    setup_future_usage: "on_session",
+    description: description ? description : '',
+    setup_future_usage: 'on_session',
   });
   return paymentIntent;
 };
@@ -189,7 +188,7 @@ const confirmPaymentIntentInStripe = async ({
   const paymentIntent = await stripe.paymentIntents.confirm(paymentIntentId, {
     payment_method: paymentMethod,
     // payment_method: "pm_1QynpaSHpKyhkVYhg975EiCZ",
-    return_url: "https://www.youtube.com",
+    return_url: 'https://www.youtube.com',
   });
   return paymentIntent;
 };
@@ -214,7 +213,7 @@ const createSubscriptionInStripe = async (
     default_payment_method: paymentMethodId,
     collection_method: common.SUBSCRIPTION.COLLECTION_METHOD,
     cancel_at: cancelAt,
-    expand: ["latest_invoice"],
+    expand: ['latest_invoice'],
     promotion_code: stripePromocodeId,
   });
   return subscription;
@@ -240,15 +239,15 @@ const updateSubscriptionInStripe = async (subscriptionId, metadata) => {
 
 const removePromocodeFromSubscriptionInStripe = async (subscriptionId) => {
   const subscription = await stripe.subscriptions.update(subscriptionId, {
-    promotion_code: "",
+    promotion_code: '',
   });
   return subscription;
 };
 
 const resetSubscriptionTimeInStripe = async (subscriptionId) => {
   const subscription = await stripe.subscriptions.update(subscriptionId, {
-    billing_cycle_anchor: "now",
-    proration_behavior: "create_prorations",
+    billing_cycle_anchor: 'now',
+    proration_behavior: 'create_prorations',
   });
   return subscription;
 };
@@ -270,7 +269,7 @@ const updatePaymentMethodOfSubscriptionInStripe = async (
 
 const resumeSubscriptionInStripe = async (subscriptionId) => {
   const subscription = await stripe.subscriptions.update(subscriptionId, {
-    pause_collection: "",
+    pause_collection: '',
   });
   // const subscription = await stripe.subscriptions.resume(subscriptionId, {
   //   proration_behavior: "always_invoice",
@@ -306,11 +305,7 @@ const getInvoiceByIdFromStripe = async (invoiceId) => {
   return invoice;
 };
 
-const constructWebhookInStripe = async ({
-  rowData,
-  signature,
-  endpointSecret,
-}) => {
+const constructWebhookInStripe = ({ rowData, signature, endpointSecret }) => {
   const event = stripe.webhooks.constructEvent(
     rowData,
     signature,
@@ -331,7 +326,7 @@ const createCoupenInStripe = async (
   plan,
   maxRedumption
 ) => {
-  let obj = {
+  const obj = {
     name: stripeCoupenName,
     currency,
     duration,
@@ -367,7 +362,7 @@ const updateCoupenInStripe = async (coupenId, coupenName) => {
 
 const deleteCoupenInStripe = async (coupenId) => {
   await stripe.coupons.del(coupenId);
-  return "coupen deleted successfully";
+  return 'coupen deleted successfully';
 };
 
 // promocode
@@ -383,7 +378,7 @@ const createPromocodeInStripe = async (
   const createdPromocode = await stripe.promotionCodes.create({
     coupon: coupenId,
     code: promocode,
-    customer: specificCustomer != "" ? specificCustomer : null,
+    customer: specificCustomer != '' ? specificCustomer : null,
     max_redemptions: maxRedumption,
     restrictions: {
       minimum_amount: minAmount,

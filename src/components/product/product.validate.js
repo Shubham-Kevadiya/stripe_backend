@@ -1,11 +1,11 @@
-import Joi from "joi";
+import Joi from 'joi';
 
 const createProductSchema = Joi.object({
   name: Joi.string().required(),
   oneTimePrice: Joi.array()
     .items(
       Joi.object({
-        interval: Joi.string().valid("week", "month", "year").required(),
+        interval: Joi.string().valid('week', 'month', 'year').required(),
         amount: Joi.number().required(),
       })
     )
@@ -13,11 +13,11 @@ const createProductSchema = Joi.object({
   subscriptionPrice: Joi.array()
     .items(
       Joi.object({
-        interval: Joi.string().valid("week", "month", "year").required(),
+        interval: Joi.string().valid('week', 'month', 'year').required(),
         amount: Joi.number().required(),
       })
     )
-    .when("oneTimePrice", {
+    .when('oneTimePrice', {
       is: Joi.array().empty(),
       then: Joi.optional(),
       otherwise: Joi.required(),
@@ -30,7 +30,7 @@ const updateProductSchema = Joi.object({
   oneTimePrice: Joi.array()
     .items(
       Joi.object({
-        interval: Joi.string().valid("week", "month", "year").required(),
+        interval: Joi.string().valid('week', 'month', 'year').required(),
         amount: Joi.number().required(),
       })
     )
@@ -38,7 +38,7 @@ const updateProductSchema = Joi.object({
   subscriptionPrice: Joi.array()
     .items(
       Joi.object({
-        interval: Joi.string().valid("week", "month", "year").required(),
+        interval: Joi.string().valid('week', 'month', 'year').required(),
         amount: Joi.number().required(),
       })
     )

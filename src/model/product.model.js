@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const productSchema = new mongoose.Schema(
   {
@@ -19,7 +19,7 @@ const productSchema = new mongoose.Schema(
         stripePriceId: { type: String, require: true },
         interval: {
           type: String,
-          enum: ["week", "month", "year"],
+          enum: ['week', 'month', 'year'],
           require: true,
         },
         price: { type: Number, require: true },
@@ -30,7 +30,7 @@ const productSchema = new mongoose.Schema(
         stripePriceId: { type: String, require: true },
         interval: {
           type: String,
-          enum: ["week", "month", "year"],
+          enum: ['week', 'month', 'year'],
           require: true,
         },
         price: { type: Number, require: true },
@@ -40,4 +40,4 @@ const productSchema = new mongoose.Schema(
   { timestamps: true, versionKey: false }
 );
 
-export const ProductModel = new mongoose.model("product", productSchema);
+export const ProductModel = new mongoose.model('product', productSchema);
