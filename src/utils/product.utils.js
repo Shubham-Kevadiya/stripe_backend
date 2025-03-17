@@ -1,4 +1,4 @@
-import { ProductModel } from "../model/product.model.js";
+import { ProductModel } from '../model/product.model.js';
 
 const saveProduct = async (productData) => {
   const product = await new ProductModel(productData).save();
@@ -25,8 +25,8 @@ const getProductByName = async (productName) => {
 const updateProductById = async (productData) => {
   const product = await getProductById(productData.productId);
   if (!product) {
-    console.log("product not found");
-    throw new Error("RESOURCE_NOT_FOUND");
+    console.log('product not found');
+    throw new Error('RESOURCE_NOT_FOUND');
   }
   const updatedProduct = await ProductModel.findByIdAndUpdate(
     productData.productId,
@@ -41,11 +41,11 @@ const updateProductById = async (productData) => {
 const deleteProductById = async (productId) => {
   const product = await getProductById(productId);
   if (!product) {
-    console.log("product not found");
-    throw new Error("NOT_FOUND");
+    console.log('product not found');
+    throw new Error('NOT_FOUND');
   }
   await ProductModel.findByIdAndDelete(productId);
-  return "product deleted successsfully !";
+  return 'product deleted successsfully !';
 };
 
 const countDocuments = async (query) => {

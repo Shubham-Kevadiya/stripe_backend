@@ -1,8 +1,8 @@
-import dotenv from "dotenv-safe";
+import dotenv from 'dotenv-safe';
 
 dotenv.config({
-  path: "./.env",
-  example: "./.env.example",
+  path: './.env',
+  example: './.env.example',
 });
 
 export default {

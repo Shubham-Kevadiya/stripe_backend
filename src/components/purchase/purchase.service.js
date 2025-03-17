@@ -1,12 +1,12 @@
-import purchaseUtils from "../../utils/purchase.utils.js";
-import userUtils from "../../utils/user.utils.js";
+import purchaseUtils from '../../utils/purchase.utils.js';
+import userUtils from '../../utils/user.utils.js';
 
 const getAllFilteredPurchaseOfUser = async (data) => {
-  let filterQuery = {};
+  const filterQuery = {};
   const user = await userUtils.getUserById(data.userId);
   if (!user) {
-    console.log("user not found in get all filtered subscription");
-    throw new Error("USER_NOT_FOUND");
+    console.log('user not found in get all filtered subscription');
+    throw new Error('USER_NOT_FOUND');
   }
   if (data.isActive) {
     filterQuery.isCanceled = false;
@@ -16,11 +16,11 @@ const getAllFilteredPurchaseOfUser = async (data) => {
   if (data.paymentFailed) {
     filterQuery.paymentConfirmed = false;
   }
-  if (data.type == "subscription") {
-    filterQuery.planType = "subscription";
+  if (data.type == 'subscription') {
+    filterQuery.planType = 'subscription';
   }
-  if (data.type == "one-time") {
-    filterQuery.planType = "one-time";
+  if (data.type == 'one-time') {
+    filterQuery.planType = 'one-time';
   }
   const purchase = await purchaseUtils.getFilteredPurchaseOfUser({
     ...filterQuery,

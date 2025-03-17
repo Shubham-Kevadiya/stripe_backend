@@ -1,4 +1,4 @@
-import { PaymentModel } from "../model/payment.model.js";
+import { PaymentModel } from '../model/payment.model.js';
 
 const savePayment = async (paymentData) => {
   const payment = await new PaymentModel(paymentData).save();
@@ -13,7 +13,7 @@ const getAllPayment = async (page, limit) => {
 };
 
 const getAllCistinctPaymentUsingStripePaymentId = async () => {
-  const payments = await PaymentModel.distinct("stripePaymentId");
+  const payments = await PaymentModel.distinct('stripePaymentId');
   return payments;
 };
 
@@ -30,8 +30,8 @@ const getPaymentusingWebhookData = async (webhookData) => {
 const updatePaymentById = async (paymentData) => {
   const payment = await getPaymentById(paymentData.paymentId);
   if (!payment) {
-    console.log("payment not found in update payment");
-    throw new Error("NOT_FOUND");
+    console.log('payment not found in update payment');
+    throw new Error('NOT_FOUND');
   }
   const updatedPayment = await PaymentModel.findByIdAndUpdate(
     paymentData.paymentId,
@@ -45,11 +45,11 @@ const updatePaymentById = async (paymentData) => {
 const deletePaymentById = async (paymentId) => {
   const payment = await getPaymentById(paymentId);
   if (!payment) {
-    console.log("payment not found in delete payment");
-    throw new Error("NOT_FOUND");
+    console.log('payment not found in delete payment');
+    throw new Error('NOT_FOUND');
   }
   await PaymentModel.findByIdAndDelete(paymentId);
-  return "payment deleted successsfully !";
+  return 'payment deleted successsfully !';
 };
 
 export default {

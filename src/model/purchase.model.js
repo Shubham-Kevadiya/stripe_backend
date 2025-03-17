@@ -1,10 +1,10 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const purchaseSchema = new mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "user",
+      ref: 'user',
       required: true,
     },
     // paymentId: {
@@ -17,17 +17,17 @@ const purchaseSchema = new mongoose.Schema(
     },
     planId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "product",
+      ref: 'product',
       required: true,
     },
     planType: {
       type: String,
-      enum: ["one-time", "subscription"],
+      enum: ['one-time', 'subscription'],
       require: true,
     },
     interval: {
       type: String,
-      enum: ["week", "month", "year"],
+      enum: ['week', 'month', 'year'],
       require: true,
     },
     amount: {
@@ -36,15 +36,15 @@ const purchaseSchema = new mongoose.Schema(
     },
     planStartDate: {
       type: Date,
-      default: "",
+      default: '',
     },
     planEndDate: {
       type: Date,
-      default: "",
+      default: '',
     },
     planPauseDate: {
       type: Date,
-      default: "",
+      default: '',
     },
     nextPaymentDate: {
       type: Date,
@@ -53,7 +53,7 @@ const purchaseSchema = new mongoose.Schema(
     transactionHistory: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "payment",
+        ref: 'payment',
         required: true,
       },
     ],
@@ -81,4 +81,4 @@ const purchaseSchema = new mongoose.Schema(
   { timestamps: true, versionKey: false }
 );
 
-export const PurchaseModel = new mongoose.model("purchase", purchaseSchema);
+export const PurchaseModel = new mongoose.model('purchase', purchaseSchema);

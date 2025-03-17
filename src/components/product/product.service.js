@@ -1,5 +1,5 @@
-import productUtils from "../../utils/product.utils.js";
-import stripeHelper from "../../helper/stripe.helper.js";
+import productUtils from '../../utils/product.utils.js';
+import stripeHelper from '../../helper/stripe.helper.js';
 
 const createProduct = async (productData) => {
   try {
@@ -7,11 +7,11 @@ const createProduct = async (productData) => {
       productData.name
     );
     if (existingProduct) {
-      console.log("Error from create product, product name repeated");
-      throw new Error("PRODUCT_ALREADY_EXIST");
+      console.log('Error from create product, product name repeated');
+      throw new Error('PRODUCT_ALREADY_EXIST');
     }
-    let oneTimePriceArr = [];
-    let recurringPriceArr = [];
+    const oneTimePriceArr = [];
+    const recurringPriceArr = [];
     const product = await stripeHelper.createProductInStripe(productData.name);
     if (productData.oneTimePrice) {
       for await (const price of productData.oneTimePrice) {
@@ -66,8 +66,8 @@ const updateProduct = async (productData) => {
       productData.productId
     );
     if (!existingProduct) {
-      console.log("Product not found to update");
-      throw new Error("RESOURCE_NOT_FOUND");
+      console.log('Product not found to update');
+      throw new Error('RESOURCE_NOT_FOUND');
     }
     if (productData.name) {
       const productWithSameName = await productUtils.getProductByName(
@@ -77,12 +77,12 @@ const updateProduct = async (productData) => {
         productWithSameName &&
         productWithSameName._id.toString() != existingProduct._id.toString()
       ) {
-        console.log("Error from update product, product name repeated");
-        throw new Error("PRODUCT_NAME_ALREADY_EXIST");
+        console.log('Error from update product, product name repeated');
+        throw new Error('PRODUCT_NAME_ALREADY_EXIST');
       }
     }
-    let oneTimePriceArr = [];
-    let recurringPriceArr = [];
+    const oneTimePriceArr = [];
+    const recurringPriceArr = [];
     if (productData.oneTimePrice && productData.oneTimePrice.length > 0) {
       for (let i = 0; i < existingProduct.stripePriceForOneTime.length; i++) {
         await stripeHelper.deletePriceInStripe(
@@ -158,7 +158,7 @@ const updateProduct = async (productData) => {
     });
     return product;
   } catch (error) {
-    console.log("Error from update product", { error });
+    console.log('Error from update product', { error });
     throw new Error(error.message);
   }
 };
@@ -176,8 +176,8 @@ const getProductById = async (productId) => {
   try {
     const product = await productUtils.getProductById(productId);
     if (!product) {
-      console.log("product not found");
-      throw new Error("NOT_FOUND");
+      console.log('product not found');
+      throw new Error('NOT_FOUND');
     }
     return product;
   } catch (error) {
@@ -189,8 +189,8 @@ const deleteProduct = async (productId) => {
   try {
     const existingProduct = await productUtils.getProductById(productId);
     if (!existingProduct) {
-      console.log("Product not found to delete");
-      throw new Error("RESOURCE_NOT_FOUND");
+      console.log('Product not found to delete');
+      throw new Error('RESOURCE_NOT_FOUND');
     }
     for (let i = 0; i < existingProduct.stripePriceForOneTime.length; i++) {
       await stripeHelper.deletePriceInStripe(
@@ -204,7 +204,7 @@ const deleteProduct = async (productId) => {
     }
     await stripeHelper.deleteProductInStripe(existingProduct.productId);
     await productUtils.deleteProductById(productId);
-    return "Product Deleted Successfully";
+    return 'Product Deleted Successfully';
   } catch (error) {
     throw new Error(error.message);
   }

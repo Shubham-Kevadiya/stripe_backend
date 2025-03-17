@@ -1,14 +1,13 @@
-import userUtils from "../../utils/user.utils.js";
-import stripeHelper from "../../helper/stripe.helper.js";
-import common from "../../constants/common.js";
-import purchaseUtils from "../../utils/purchase.utils.js";
+import common from '../../constants/common.js';
+import stripeHelper from '../../helper/stripe.helper.js';
+import userUtils from '../../utils/user.utils.js';
 
 const createPaymentMethod = async (paymentMethodData, userId) => {
   try {
     const user = await userUtils.getUserById(userId);
     if (!user) {
-      console.log("user not found in create payment method");
-      throw new Error("USER_NOT_FOUND");
+      console.log('user not found in create payment method');
+      throw new Error('USER_NOT_FOUND');
     }
 
     // const token = await stripeHelper.createTokenForPaymenthodInStripe(
@@ -26,7 +25,7 @@ const createPaymentMethod = async (paymentMethodData, userId) => {
       paymentMethod.id,
       user.customerId
     );
-    if (user.defaultPaymentMethod.id == "" && user.paymentMethod.length == 0) {
+    if (user.defaultPaymentMethod.id == '' && user.paymentMethod.length == 0) {
       await stripeHelper.setDefaultPaymenteMethodToCustomerInStripe(
         user.customerId,
         paymentMethod.id
@@ -48,7 +47,7 @@ const createPaymentMethod = async (paymentMethodData, userId) => {
     });
     return updatedUser;
   } catch (error) {
-    console.log("Error from create payment Method", { error });
+    console.log('Error from create payment Method', { error });
     // throw new Error(
     //   common.STRIPE_ERROR_CODES[error.code]
     //     ? common.STRIPE_ERROR_CODES[error.code].error
@@ -62,8 +61,8 @@ const getPaymentMethodOfUser = async (userId, paymentMethodId, limit) => {
   try {
     const user = await userUtils.getUserById(userId);
     if (!user) {
-      console.log("user not found in create payment method");
-      throw new Error("CARD_NOT_OWNED_BY_USER");
+      console.log('user not found in create payment method');
+      throw new Error('CARD_NOT_OWNED_BY_USER');
     }
     // if (user.defaultPaymentMethod && user.defaultPaymentMethod.id != "") {
     //   user.paymentMethod.splice(
@@ -89,7 +88,7 @@ const getPaymentMethodOfUser = async (userId, paymentMethodId, limit) => {
       );
     return paymentMethodOfUser;
   } catch (error) {
-    console.log("Error from get payment Method of user");
+    console.log('Error from get payment Method of user');
     throw new Error(error.message);
   }
 };
@@ -98,23 +97,22 @@ const getPaymentMethodByPaymentMethodId = async (userId, paymentMethodId) => {
   try {
     const user = await userUtils.getUserById(userId);
     if (!user) {
-      console.log("user not found in create payment method");
-      throw new Error("USER_NOT_FOUND");
+      console.log('user not found in create payment method');
+      throw new Error('USER_NOT_FOUND');
     }
-    const paymentMethods = user.paymentMethod.map((a) => {
-      return a.id;
+    const paymentMethods = user.paymentMethod.map((paymentMethod) => {
+      return paymentMethod.id;
     });
     if (!paymentMethods.includes(paymentMethodId)) {
-      console.log("user has no payment method with this id");
-      throw new Error("CARD_NOT_OWNED_BY_USER");
+      console.log('user has no payment method with this id');
+      throw new Error('CARD_NOT_OWNED_BY_USER');
     }
-    const paymentMethod = await stripeHelper.getPaymentMethodInStripe(
-      paymentMethodId
-    );
+    const paymentMethod =
+      await stripeHelper.getPaymentMethodInStripe(paymentMethodId);
     return paymentMethod;
   } catch (error) {
-    console.log("Error from get payment Method By payment method id");
-    // throw new Error(error.message);
+    console.log('Error from get payment Method By payment method id');
+    throw new Error(error.message);
   }
 };
 
@@ -126,15 +124,15 @@ const updatePaymentMethodOfUser = async (
   try {
     const user = await userUtils.getUserById(userId);
     if (!user) {
-      console.log("user not found in create payment method");
-      throw new Error("USER_NOT_FOUND");
+      console.log('user not found in create payment method');
+      throw new Error('USER_NOT_FOUND');
     }
-    const paymentMethods = user.paymentMethod.map((a) => {
-      return a.id;
+    const paymentMethods = user.paymentMethod.map((paymentMethod) => {
+      return paymentMethod.id;
     });
     if (!paymentMethods.includes(paymentMethodId)) {
-      console.log("user has no payment method with this id");
-      throw new Error("CARD_NOT_OWNED_BY_USER");
+      console.log('user has no payment method with this id');
+      throw new Error('CARD_NOT_OWNED_BY_USER');
     }
     const updatedPaymentMethod = await stripeHelper.updatePaymentMethodInStripe(
       paymentMethodData,
@@ -142,8 +140,8 @@ const updatePaymentMethodOfUser = async (
     );
     return updatedPaymentMethod;
   } catch (error) {
-    console.log("Error from update payment Method of user");
-    // throw new Error(error.message);
+    console.log('Error from update payment Method of user');
+    throw new Error(error.message);
   }
 };
 
@@ -154,8 +152,8 @@ const deletePaymentMethodByPaymentMethodId = async (
   try {
     const user = await userUtils.getUserById(userId);
     if (!user) {
-      console.log("user not found in create payment method");
-      throw new Error("USER_NOT_FOUND");
+      console.log('user not found in create payment method');
+      throw new Error('USER_NOT_FOUND');
     }
     // const paymentMethods = user.paymentMethod.map((a) => {
     //   return a.id;
@@ -195,19 +193,21 @@ const deletePaymentMethodByPaymentMethodId = async (
     await stripeHelper.detachPaymentMethodInStripe(paymentMethodId);
 
     user.paymentMethod.splice(
-      user.paymentMethod.findIndex((a) => a.id === paymentMethodId),
+      user.paymentMethod.findIndex(
+        (paymentMethod) => paymentMethod.id === paymentMethodId
+      ),
       1
     );
     if (user.defaultPaymentMethod.id == paymentMethodId) {
       user.defaultPaymentMethod = {
-        id: "",
-        type: "",
+        id: '',
+        type: '',
       };
     }
     await userUtils.updateUserById({ ...user, userId: user._id });
-    return { msg: "Payment Method deleted successfully" };
+    return { msg: 'Payment Method deleted successfully' };
   } catch (error) {
-    console.log("Error from delete payment Method By payment method id");
+    console.log('Error from delete payment Method By payment method id');
     throw new Error(error.message);
   }
 };
@@ -216,19 +216,21 @@ const setDefaultPaymentMethod = async (userId, paymentMethodId) => {
   try {
     const user = await userUtils.getUserById(userId);
     if (!user) {
-      console.log("user not found in create payment method");
-      throw new Error("USER_NOT_FOUND");
+      console.log('user not found in create payment method');
+      throw new Error('USER_NOT_FOUND');
     }
-    const paymentMethods = user.paymentMethod.map((a) => {
-      return a.id;
+    const paymentMethods = user.paymentMethod.map((paymentMethod) => {
+      return paymentMethod.id;
     });
     if (!paymentMethods.includes(paymentMethodId)) {
-      console.log("user has no payment method with this id");
-      throw new Error("CARD_NOT_OWNED_BY_USER");
+      console.log('user has no payment method with this id');
+      throw new Error('CARD_NOT_OWNED_BY_USER');
     }
     user.defaultPaymentMethod =
       user.paymentMethod[
-        user.paymentMethod.findIndex((a) => a.id === paymentMethodId)
+        user.paymentMethod.findIndex(
+          (paymentMethod) => paymentMethod.id === paymentMethodId
+        )
       ];
     await stripeHelper.setDefaultPaymenteMethodToCustomerInStripe(
       user.customerId,
@@ -237,7 +239,7 @@ const setDefaultPaymentMethod = async (userId, paymentMethodId) => {
     await userUtils.updateUserById({ ...user, userId: user._id });
     return user;
   } catch (error) {
-    console.log("Error from set default payment Method ");
+    console.log('Error from set default payment Method ');
     throw new Error(error.message);
   }
 };

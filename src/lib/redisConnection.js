@@ -1,5 +1,5 @@
-import { createClient } from "redis";
-import config from "../config/config.js";
+import { createClient } from 'redis';
+import config from '../config/config.js';
 
 const redisConfig = {
   username: config.redis.username,
@@ -12,11 +12,11 @@ const redisConfig = {
 export const redisClient = createClient(redisConfig);
 
 export const redisConnection = async () => {
-  redisClient.on("connect", () => {
-    console.log("Redis server connected");
+  redisClient.on('connect', () => {
+    console.log('Redis server connected');
   });
 
-  redisClient.on("error", (err) => {
+  redisClient.on('error', (err) => {
     console.log(err);
   });
 

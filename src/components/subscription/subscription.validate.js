@@ -1,4 +1,4 @@
-import Joi from "joi";
+import Joi from 'joi';
 
 const createSubscriptionSchema = Joi.object({
   paymentMethodId: Joi.string().required(),
@@ -10,7 +10,7 @@ const createSubscriptionSchema = Joi.object({
       })
     )
     .required(),
-  interval: Joi.string().valid("week", "month", "year").required(),
+  interval: Joi.string().valid('week', 'month', 'year').required(),
   planType: Joi.string().required(),
   amount: Joi.number().required(),
   promocodeId: Joi.string().optional(),

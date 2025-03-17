@@ -1,4 +1,4 @@
-import paymentMethodService from "./paymentMethod.service.js";
+import paymentMethodService from './paymentMethod.service.js';
 
 export const createPaymentMethod = async (req, res, next) => {
   try {
@@ -10,7 +10,7 @@ export const createPaymentMethod = async (req, res, next) => {
     );
     return res.status(200).json(user);
   } catch (error) {
-    console.log("error", "error in create payment method", error);
+    console.log('error', 'error in create payment method', error);
     next(error);
   }
 };
@@ -27,7 +27,7 @@ export const updatePaymentMethod = async (req, res, next) => {
     );
     return res.status(200).json(user);
   } catch (error) {
-    console.log("error", "error in update payment method", error);
+    console.log('error', 'error in update payment method', error);
     next(error);
   }
 };
@@ -42,7 +42,7 @@ export const setDefaultPaymentMethod = async (req, res, next) => {
     );
     return res.status(200).json(user);
   } catch (error) {
-    console.log("error", "error in set default payment method", error);
+    console.log('error', 'error in set default payment method', error);
     next(error);
   }
 };
@@ -58,7 +58,7 @@ export const getPaymentMethodOfUser = async (req, res, next) => {
       has_more: paymentMethodOfUser.hasMore,
     });
   } catch (error) {
-    console.log("error", "error in get payment method of user", error);
+    console.log('error', 'error in get payment method of user', error);
     next(error);
   }
 };
@@ -74,7 +74,7 @@ export const getPaymentMethodFromStripeById = async (req, res, next) => {
       );
     return res.status(200).json(paymentMethodOfUser);
   } catch (error) {
-    console.log("error", "error in get payment method of user", error);
+    console.log('error', 'error in get payment method of user', error);
     next(error);
   }
 };
@@ -87,9 +87,9 @@ export const deletePaymentMethodById = async (req, res, next) => {
       userId,
       paymentMethodId
     );
-    return res.status(200).json({ msg: "Payment Method deleted successfully" });
+    return res.status(200).json({ msg: 'Payment Method deleted successfully' });
   } catch (error) {
-    console.log("error", "error in get payment method of user", error);
+    console.log('error', 'error in get payment method of user', error);
     next(error);
   }
 };

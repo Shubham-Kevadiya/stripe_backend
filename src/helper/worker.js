@@ -1,11 +1,11 @@
-import { Worker } from "bullmq";
-import webhookHelper from "./webhook.helper.js";
-import config from "../config/config.js";
+import { Worker } from 'bullmq';
+import config from '../config/config.js';
+import webhookHelper from './webhook.helper.js';
 
-let failedTask = [];
+const failedTask = [];
 
 export const successIntentWorker = new Worker(
-  "success-intent-queue",
+  'success-intent-queue',
   async (job) => {
     try {
       await new Promise((resolve) => setTimeout(resolve, 5000));
@@ -25,7 +25,7 @@ export const successIntentWorker = new Worker(
 );
 
 export const failedIntentWorker = new Worker(
-  "failed-intent-queue",
+  'failed-intent-queue',
   async (job) => {
     try {
       console.log(`Job ${job.id} is in process from failed-intent-queue`);
@@ -45,7 +45,7 @@ export const failedIntentWorker = new Worker(
 );
 
 export const deleteSubscriptionWorker = new Worker(
-  "delete-suscription-queue",
+  'delete-suscription-queue',
   async (job) => {
     try {
       console.log(`Job ${job.id} is in process from delete-suscription-queue`);
@@ -64,82 +64,53 @@ export const deleteSubscriptionWorker = new Worker(
   }
 );
 
-successIntentWorker.on("failed", async (job, error) => {
+successIntentWorker.on('failed', (job, error) => {
   console.log(
     `Success Intent Queue job with jobId ${job.id} failed. Error:`,
     error
   );
-  try {
-    if ((error.statusCode = 429)) {
-      try {
-        await webhookHelper.paymentIntentSuccessHelper(job.data.intentId);
-      } catch (error) {
-        failedTask.push({
-          id: job.data.id,
-          metadata: job.data.metadata,
-          jobId: job.id,
-          failedReason: job.failedReason,
-        });
 
-        console.log(
-          `Success Intent Queue job with jobId ${job.id} failed. Error:`,
-          error
-        );
-      }
-    } else {
-      failedTask.push({
-        id: job.data.id,
-        metadata: job.data.metadata,
-        jobId: job.id,
-        failedReason: job.failedReason,
-      });
+  failedTask.push({
+    id: job.data.id,
+    metadata: job.data.metadata,
+    jobId: job.id,
+    failedReason: job.failedReason,
+  });
 
-      console.log(
-        `Success Intent Queue job with jobId ${job.id} failed. Error:`,
-        error
-      );
-    }
-  } catch (error) {
-    console.log("Error from Success Intent Queue failed status", error);
-  }
+  console.log(
+    `Success Intent Queue job with jobId ${job.id} failed. Error:`,
+    error
+  );
 });
 
-successIntentWorker.on("completed", (job, result) => {
+successIntentWorker.on('completed', (job, result) => {
   console.log(`Success Intent Queue job with jobId ${job.id} completed. `);
 });
 
-failedIntentWorker.on("failed", async (job, error) => {
-  try {
-    failedTask.push({
-      id: job.data.id,
-      metadata: job.data.metadata,
-      jobId: job.id,
-      failedReason: job.failedReason,
-    });
+failedIntentWorker.on('failed', (job, error) => {
+  failedTask.push({
+    id: job.data.id,
+    metadata: job.data.metadata,
+    jobId: job.id,
+    failedReason: job.failedReason,
+  });
 
-    console.log(
-      `Failed Intent Queue job with jobId ${job.id} failed. Error:`,
-      error
-    );
-  } catch (error) {
-    console.log("Error from Failed Intent Queue failed status", error);
-  }
+  console.log(
+    `Failed Intent Queue job with jobId ${job.id} failed. Error:`,
+    error
+  );
 });
 
-deleteSubscriptionWorker.on("failed", async (job, error) => {
-  try {
-    failedTask.push({
-      id: job.data.id,
-      metadata: job.data.metadata,
-      jobId: job.id,
-      failedReason: job.failedReason,
-    });
+deleteSubscriptionWorker.on('failed', (job, error) => {
+  failedTask.push({
+    id: job.data.id,
+    metadata: job.data.metadata,
+    jobId: job.id,
+    failedReason: job.failedReason,
+  });
 
-    console.log(
-      `Delete Subscription Queue job with jobId ${job.id} failed. Error:`,
-      error
-    );
-  } catch (error) {
-    console.log("Error from Delete Subscription Queue failed status", error);
-  }
+  console.log(
+    `Delete Subscription Queue job with jobId ${job.id} failed. Error:`,
+    error
+  );
 });

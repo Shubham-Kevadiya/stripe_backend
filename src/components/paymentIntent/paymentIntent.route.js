@@ -1,13 +1,13 @@
-import express from "express";
-import paymentIntentValidate from "../../middleware/validation.js";
-import paymentIntentValidateSchema from "./paymentIntent.validate.js";
-import paymentIntentController from "./paymentIntent.controller.js";
-import authenticateUser from "../../middleware/authenticateUser.js";
+import express from 'express';
+import paymentIntentValidate from '../../middleware/validation.js';
+import paymentIntentValidateSchema from './paymentIntent.validate.js';
+import paymentIntentController from './paymentIntent.controller.js';
+import authenticateUser from '../../middleware/authenticateUser.js';
 
 const paymentIntentRoute = express.Router();
 
 paymentIntentRoute.post(
-  "/create",
+  '/create',
   authenticateUser.validateAuthIdToken,
   paymentIntentValidate.validateBodySchema(
     paymentIntentValidateSchema.createPaymentIntentSchema
@@ -15,7 +15,7 @@ paymentIntentRoute.post(
   paymentIntentController.createPaymentIntent
 );
 paymentIntentRoute.post(
-  "/confirm/:paymentIntentId",
+  '/confirm/:paymentIntentId',
   authenticateUser.validateAuthIdToken,
   paymentIntentValidate.validateBodySchema(
     paymentIntentValidateSchema.confirmPaymentIntentSchema

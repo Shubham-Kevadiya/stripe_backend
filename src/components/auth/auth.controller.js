@@ -1,4 +1,4 @@
-import authService from "./auth.service.js";
+import authService from './auth.service.js';
 
 const register = async (req, res, next) => {
   try {
@@ -8,7 +8,7 @@ const register = async (req, res, next) => {
     delete user.password;
     return res.status(200).json(user);
   } catch (error) {
-    console.log("error", "error in register", error);
+    console.log('error', 'error in register', error);
     next(error);
   }
 };
@@ -24,7 +24,7 @@ const login = async (req, res, next) => {
 
     return res.status(200).json(user);
   } catch (error) {
-    console.log("error", "error in login", error);
+    console.log('error', 'error in login', error);
     next(error);
   }
 };

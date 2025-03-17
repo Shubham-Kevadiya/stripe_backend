@@ -1,4 +1,4 @@
-import purchaseService from "./purchase.service.js";
+import purchaseService from './purchase.service.js';
 
 const getAllFilteredPurchaseOfUser = async (req, res, next) => {
   try {
@@ -10,7 +10,7 @@ const getAllFilteredPurchaseOfUser = async (req, res, next) => {
     });
     return res.status(200).json({ purchase });
   } catch (error) {
-    console.log("error", "error in get all filtered purchase", error);
+    console.log('error', 'error in get all filtered purchase', error);
     next(error);
   }
 };

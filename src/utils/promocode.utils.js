@@ -1,4 +1,4 @@
-import { PromocodeModel } from "../model/promocode.model.js";
+import { PromocodeModel } from '../model/promocode.model.js';
 
 const savePromocode = async (promocodeData) => {
   const promocode = await new PromocodeModel(promocodeData).save();
@@ -51,7 +51,7 @@ const updatePromocodeById = async (promocodeId, promocodeData) => {
 
 const deletePromocodeById = async (promocodeId) => {
   await PromocodeModel.findByIdAndDelete(promocodeId);
-  return "promocode deleted successsfully !";
+  return 'promocode deleted successsfully !';
 };
 
 export default {
