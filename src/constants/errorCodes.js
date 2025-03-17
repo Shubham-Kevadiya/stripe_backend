@@ -148,6 +148,13 @@ export default {
       message: 'Promocode Already Used',
     },
   },
+  INVALID_PLAN_FOR_PROMOCODE: {
+    httpStatusCode: 401,
+    body: {
+      code: 'invalid_plan_for_promocode',
+      message: 'Invalid Plan For Promocode',
+    },
+  },
   CURRENCY_MISMATCHED: {
     httpStatusCode: 401,
     body: {

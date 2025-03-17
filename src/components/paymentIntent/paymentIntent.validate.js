@@ -6,7 +6,7 @@ const createPaymentIntentSchema = Joi.object({
     type: Joi.string().required(),
   }),
   planId: Joi.string().required(),
-  promocodeId: Joi.string().required(),
+  promocodeId: Joi.string().optional(),
   // planType: Joi.string().valid("one-time", "subscription").required(),
   // interval: Joi.string().valid("week", "month", "year").required(),
   amount: Joi.number().required(),

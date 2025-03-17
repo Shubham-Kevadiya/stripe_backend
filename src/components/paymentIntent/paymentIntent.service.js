@@ -36,33 +36,39 @@ const createPaymentIntent = async (paymentData) => {
       );
       throw new Error('PAYMENT_METHOD_NOT_FOUND');
     }
-    const promocode = await promocodeUtils.getPromocodeById(
-      paymentData.promocodeId
-    );
-
-    if (!promocode) {
-      console.log('Promocode not found in create subscription', {
-        promocodeId: paymentData.stripePromocodeId,
-      });
-      throw new Error('NOT_FOUND');
-    }
-    if (promocode.promocodeFor != 'one-time') {
-      console.log(`Invalid promocode for ${promocode.promocodeFor}`, {
-        promocodeId: promocode._id,
-      });
-      throw new Error('CONFLICT');
-    }
-
     let amount;
-    if (promocode.discountInAmount) {
-      amount = paymentData.amount - promocode.discountInAmount;
-    } else if (promocode.discountInPercentage) {
-      amount =
-        paymentData.amount -
-        Math.round((paymentData.amount * promocode.discountInPercentage) / 100);
-    }
+    let payment;
+    let promocode;
+    if (paymentData.promocodeId) {
+      promocode = await promocodeUtils.getPromocodeById(
+        paymentData.promocodeId
+      );
 
-    await promocodeHelper.isPromocodeAvailableToUse(promocode, paymentData);
+      if (!promocode) {
+        console.log('Promocode not found in create subscription', {
+          promocodeId: paymentData.stripePromocodeId,
+        });
+        throw new Error('NOT_FOUND');
+      }
+      if (promocode.promocodeFor != 'one-time') {
+        console.log(`Invalid promocode for ${promocode.promocodeFor}`, {
+          promocodeId: promocode._id,
+        });
+        throw new Error('INVALID_PLAN_FOR_PROMOCODE');
+      }
+
+      if (promocode.discountInAmount) {
+        amount = paymentData.amount - promocode.discountInAmount;
+      } else if (promocode.discountInPercentage) {
+        amount =
+          paymentData.amount -
+          Math.round(
+            (paymentData.amount * promocode.discountInPercentage) / 100
+          );
+      }
+
+      await promocodeHelper.isPromocodeAvailableToUse(promocode, paymentData);
+    }
 
     const paymentIntent = await stripeHelper.createPaymentIntentInStripe({
       amount: (amount == 0 ? amount + 0.5 : amount) * 100,
@@ -72,7 +78,6 @@ const createPaymentIntent = async (paymentData) => {
       description: (paymentData.description = 'IT Service Intent'),
     });
 
-    let payment;
     if (
       promocode.discountInAmount == paymentData.amount ||
       promocode.discountInPercentage == 100
